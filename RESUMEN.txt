@@ -1,0 +1,272 @@
+╔══════════════════════════════════════════════════════════════╗
+║                                                              ║
+║  MONITOR REAL DE E/S Y REGISTROS DEL SISTEMA                ║
+║  ================================================            ║
+║                                                              ║
+║  ✅ COMPLETADO - Lista para usar                            ║
+║                                                              ║
+╚══════════════════════════════════════════════════════════════╝
+
+📋 LO QUE SE CREÓ:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. BACKEND (Node.js + WebSocket)
+   ✓ Servidor Express en src/server.js
+   ✓ Monitor de interrupciones (src/monitors/interrupts.js)
+   ✓ Monitor de E/S (src/monitors/io.js)
+   ✓ Captura REAL de eventos (src/monitors/realtime-input.js)
+   
+2. FRONTEND (HTML/CSS/JavaScript)
+   ✓ Interfaz interactiva (public/index.html)
+   ✓ Lógica del cliente (public/app.js)
+   ✓ Estilos modernos (public/styles.css)
+
+3. DOCUMENTACIÓN
+   ✓ README.md - Documentación completa
+   ✓ QUICK_START.md - Inicio rápido
+   ✓ COMO_FUNCIONA_CAPTURA_REAL.md - Explicación técnica
+   ✓ EDUCATIONAL_GUIDE.md - Guía educativa
+   ✓ PROJECT_STRUCTURE.txt - Estructura del proyecto
+
+🎯 CARACTERÍSTICAS PRINCIPALES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✅ CAPTURA REAL DEL HARDWARE
+   • Lee directamente desde /dev/input en Linux (con sudo)
+   • Muestra scan codes REALES del hardware
+   • No simula, captura eventos REALES del kernel
+   
+✅ VISUALIZACIÓN EN TIEMPO REAL
+   • Cada tecla presionada aparece instantáneamente
+   • Muestra valores hexadecimales de registros
+   • Flash visual cuando se escribe en puertos
+   
+✅ INFORMACIÓN DETALLADA
+   • Scan codes reales (30 para 'A', no 65)
+   • Puertos de E/S (0x60, 0x64)
+   • Valores de registros en hexadecimal
+   • Tipo de evento (EV_KEY, EV_REL)
+   • Timestamps del kernel
+
+✅ DOS MODOS DE OPERACIÓN
+   • HARDWARE: Captura real (Linux + sudo)
+   • BROWSER: Fallback desde JavaScript
+
+🚀 INICIO RÁPIDO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Instalar dependencias:
+   cd io-monitor
+   npm install
+
+2. Iniciar (modo REAL en Linux):
+   sudo npm start
+   
+   O sin sudo (modo fallback):
+   npm start
+
+3. Abrir navegador:
+   http://localhost:3000
+
+4. ¡PRESIONA CUALQUIER TECLA!
+   Verás los valores REALES del hardware
+
+📊 QUÉ VERÁS EN LA PANTALLA:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+┌─────────────────────────────────────────────────────────────┐
+│ EVENTOS REALES DE HARDWARE                                  │
+│ Presiona teclas o mueve el mouse AHORA                      │
+├─────────────────────────────────────────────────────────────┤
+│ ✅ Modo: Captura DIRECTA del HARDWARE (/dev/input)         │
+├─────┬─────────┬────────┬──────┬───────────┬────────┬───────┤
+│Tiempo│Dispositivo│Acción│Tecla │Scan Code │Puerto │Registro│
+├─────┼─────────┼────────┼──────┼───────────┼────────┼───────┤
+│05:23 │⌨️ HARDWARE│PRESS │  A   │30 (0x1E) │ 0x60  │ 0x1E  │
+│05:23 │⌨️ HARDWARE│RELEASE│  A   │30 (0x1E) │ 0x60  │ 0x1E  │
+└─────┴─────────┴────────┴──────┴───────────┴────────┴───────┘
+
+🔍 CÓMO VERIFICAR QUE ES REAL:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. Ejecuta con sudo en Linux:
+   sudo npm start
+
+2. Busca en el log del servidor:
+   📡 Capturando eventos REALES desde: /dev/input/event3
+
+3. En la interfaz verás:
+   ✅ Modo: Captura DIRECTA del HARDWARE
+
+4. Cada evento tendrá la etiqueta verde:
+   HARDWARE
+
+5. Los scan codes serán diferentes:
+   • Modo HARDWARE: 30 para 'A' (scan code real)
+   • Modo BROWSER: 65 para 'A' (keyCode de JavaScript)
+
+⚙️ TECNOLOGÍAS UTILIZADAS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Backend:
+  • Node.js 14+
+  • Express (servidor HTTP)
+  • WebSocket (ws) - comunicación en tiempo real
+  • fs - lectura directa de /dev/input
+
+Frontend:
+  • HTML5
+  • CSS3 (animaciones y efectos)
+  • JavaScript vanilla (sin frameworks)
+  • Canvas API (gráficos)
+  • WebSocket API
+
+Sistema:
+  • Lee /proc/interrupts (IRQs)
+  • Lee /proc/diskstats (E/S)
+  • Lee /proc/ioports (puertos)
+  • Lee /dev/input/eventX (eventos reales)
+
+📖 FLUJO COMPLETO DE UN EVENTO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+1. PRESIONAS LA TECLA 'A'
+   ↓
+2. Controlador de teclado detecta y envía scan code 0x1E al puerto 0x60
+   ↓
+3. Genera IRQ 1 (interrupción de teclado)
+   ↓
+4. Kernel de Linux crea input_event:
+   {
+     type: 0x01,    // EV_KEY
+     code: 30,      // Scan code de 'A'
+     value: 1       // Presionada
+   }
+   ↓
+5. Escribe evento a /dev/input/event0
+   ↓
+6. Nuestra aplicación (Node.js) lee los 24 bytes del evento
+   ↓
+7. Parsea y envía por WebSocket al navegador
+   ↓
+8. Frontend muestra en tabla con flash visual
+   ↓
+9. ¡VES EL VALOR REAL DEL REGISTRO EN TU PANTALLA!
+
+🎓 CASOS DE USO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+✓ Educación: Enseñar cómo funcionan las interrupciones
+✓ Desarrollo: Entender drivers y controladores
+✓ Debugging: Identificar problemas de hardware
+✓ Investigación: Analizar comportamiento del sistema
+✓ Aprendizaje: Ver la arquitectura del sistema en acción
+
+⚠️ REQUISITOS PARA CAPTURA REAL:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Linux:
+  ✓ Ejecutar con sudo
+  ✓ Acceso a /dev/input/
+  ✓ Kernel moderno (2.6+)
+
+macOS:
+  ✗ No tiene /dev/input
+  ✓ Usa modo fallback (browser)
+
+Windows:
+  ✗ No tiene /dev/input
+  ✓ Usa modo fallback (browser)
+
+🔧 COMANDOS ÚTILES:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+# Iniciar servidor (modo real)
+sudo npm start
+
+# Iniciar sin privilegios
+npm start
+
+# Modo desarrollo (auto-reload)
+npm run dev
+
+# Cambiar puerto
+PORT=8080 npm start
+
+# Script interactivo
+./start.sh
+
+# Ver dispositivos de input (Linux)
+ls -l /dev/input/
+
+# Ver eventos en tiempo real (Linux)
+sudo cat /dev/input/event0 | hexdump -C
+
+# Ver interrupciones
+cat /proc/interrupts
+
+📁 ESTRUCTURA DE ARCHIVOS:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+io-monitor/
+├── src/
+│   ├── server.js                      # Servidor principal
+│   └── monitors/
+│       ├── interrupts.js              # Monitor de IRQs
+│       ├── io.js                      # Monitor de E/S
+│       └── realtime-input.js          # ⭐ Captura REAL
+├── public/
+│   ├── index.html                     # Interfaz
+│   ├── app.js                         # Cliente WebSocket
+│   └── styles.css                     # Estilos
+├── README.md                          # Docs principal
+├── QUICK_START.md                     # ⭐ Inicio rápido
+├── COMO_FUNCIONA_CAPTURA_REAL.md      # ⭐ Explicación técnica
+├── EDUCATIONAL_GUIDE.md               # Guía educativa
+├── PROJECT_STRUCTURE.txt              # Estructura
+├── start.sh                           # Script de inicio
+└── package.json                       # Dependencias
+
+✨ EJEMPLO DE USO:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Terminal:
+  $ cd io-monitor
+  $ sudo npm start
+  
+  ╔════════════════════════════════════════════════════════════╗
+  ║  Monitor REAL de E/S y Registros del Sistema              ║
+  ╠════════════════════════════════════════════════════════════╣
+  ║  Servidor iniciado en: http://localhost:3000               ║
+  ║                                                            ║
+  ║  📡 Capturando eventos REALES desde: /dev/input/event3    ║
+  ╚════════════════════════════════════════════════════════════╝
+
+Navegador (http://localhost:3000):
+  [Presionas 'A']
+  
+  Flash azul en pantalla: "0x60 → 0x1E"
+  
+  Tabla se actualiza:
+  ⌨️ keyboard HARDWARE | PRESS | A | 30 (0x1E) | 0x60 | 0x1E
+
+  ¡Así ves EXACTAMENTE cómo se escriben los registros!
+
+📞 SOPORTE:
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Si tienes problemas:
+1. Lee QUICK_START.md para inicio rápido
+2. Consulta COMO_FUNCIONA_CAPTURA_REAL.md para detalles técnicos
+3. Revisa EDUCATIONAL_GUIDE.md para ejercicios prácticos
+
+🎉 ¡LISTO PARA USAR!
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Esta aplicación NO ES UNA SIMULACIÓN.
+Captura eventos REALES del hardware del sistema operativo.
+
+Ejecuta con sudo en Linux y presiona cualquier tecla para ver
+cómo se manipulan los registros del controlador en tiempo real.
+
+¡Disfruta explorando los internos de tu sistema operativo! 🚀

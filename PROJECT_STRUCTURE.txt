@@ -1,0 +1,219 @@
+Monitor de E/S y Registros del Sistema
+=======================================
+
+Estructura del Proyecto:
+------------------------
+
+io-monitor/
+│
+├── src/                           # Código fuente del backend
+│   ├── server.js                  # Servidor Express + WebSocket
+│   └── monitors/                  # Módulos de monitoreo
+│       ├── interrupts.js          # Captura de IRQs
+│       └── io.js                  # Estadísticas de E/S
+│
+├── public/                        # Frontend (cliente web)
+│   ├── index.html                 # Interfaz principal
+│   ├── app.js                     # Lógica cliente + WebSocket
+│   └── styles.css                 # Estilos de la aplicación
+│
+├── package.json                   # Dependencias y scripts
+├── package-lock.json              # Lock de versiones
+├── .gitignore                     # Archivos ignorados por Git
+├── start.sh                       # Script de inicio interactivo
+├── README.md                      # Documentación principal
+├── EDUCATIONAL_GUIDE.md           # Guía educativa
+└── PROJECT_STRUCTURE.txt          # Este archivo
+
+Flujo de Datos:
+--------------
+
+1. Backend (Node.js)
+   │
+   ├─→ monitors/interrupts.js
+   │   └─→ Lee /proc/interrupts (Linux)
+   │       o simula datos (macOS/Windows)
+   │
+   ├─→ monitors/io.js
+   │   ├─→ Lee /proc/diskstats (Linux)
+   │   ├─→ Lee /proc/ioports (Linux)
+   │   └─→ Genera estadísticas de E/S
+   │
+   └─→ server.js
+       └─→ WebSocket (envía datos cada 1 segundo)
+           │
+           ↓
+2. Frontend (Browser)
+   │
+   ├─→ app.js recibe datos vía WebSocket
+   │   │
+   │   ├─→ Actualiza tabla de interrupciones
+   │   ├─→ Actualiza estadísticas de E/S
+   │   ├─→ Actualiza eventos de input
+   │   └─→ Dibuja gráficos en Canvas
+   │
+   └─→ index.html muestra la interfaz
+       └─→ styles.css aplica estilos
+
+Tecnologías Utilizadas:
+-----------------------
+
+Backend:
+  • Node.js (>=14.0.0)
+  • Express (servidor HTTP)
+  • WebSocket (ws) - comunicación en tiempo real
+  • child_process - ejecución de comandos del sistema
+  • fs - lectura de archivos /proc
+
+Frontend:
+  • HTML5 (estructura)
+  • CSS3 (estilos y animaciones)
+  • JavaScript vanilla (sin frameworks)
+  • Canvas API (gráficos)
+  • WebSocket API (comunicación)
+
+Datos Capturados:
+-----------------
+
+1. Interrupciones (IRQs):
+   • Número de IRQ
+   • Dispositivo asociado
+   • Contador total
+   • Delta (cambios recientes)
+   • Tipo (keyboard, mouse, disk, etc.)
+
+2. E/S de Dispositivos:
+   • Nombre del dispositivo
+   • Operaciones de lectura/escritura
+   • Bytes transferidos
+   • Actividad en tiempo real
+
+3. Eventos de Input:
+   • Eventos de teclado
+   • Posición del mouse
+   • Clicks del mouse
+
+4. Puertos de E/S (Linux):
+   • Rango de direcciones
+   • Dispositivo asignado
+
+Comandos Útiles:
+----------------
+
+# Instalar dependencias
+npm install
+
+# Iniciar servidor (modo normal)
+npm start
+
+# Iniciar con privilegios (Linux - acceso completo)
+sudo npm start
+
+# Modo desarrollo (auto-reload)
+npm run dev
+
+# Script interactivo
+./start.sh
+
+# Cambiar puerto
+PORT=8080 npm start
+
+Puertos de Red:
+--------------
+
+• HTTP: 3000 (por defecto)
+• WebSocket: 3000 (mismo puerto que HTTP)
+
+Permisos Necesarios:
+-------------------
+
+Linux (acceso completo):
+  • sudo requerido para:
+    - /proc/interrupts
+    - /proc/ioports
+    - /dev/input/*
+
+macOS:
+  • No requiere permisos especiales
+  • Datos de IRQ simulados
+
+Windows:
+  • No requiere permisos especiales
+  • Datos de IRQ simulados
+
+Casos de Uso:
+-------------
+
+1. Educación:
+   • Enseñar conceptos de SO
+   • Visualizar interrupciones
+   • Entender E/S del sistema
+
+2. Debugging:
+   • Identificar dispositivos problemáticos
+   • Medir actividad de E/S
+   • Detectar dispositivos activos
+
+3. Optimización:
+   • Monitorear carga de disco
+   • Identificar cuellos de botella
+   • Analizar patrones de acceso
+
+Extensibilidad:
+--------------
+
+Para agregar nuevos monitores:
+
+1. Crear archivo en src/monitors/
+2. Implementar clase con método getData()
+3. Integrar en src/server.js
+4. Actualizar frontend para mostrar datos
+
+Ejemplo:
+--------
+
+// src/monitors/custom.js
+class CustomMonitor {
+  async getData() {
+    return { data: [...] };
+  }
+}
+
+// src/server.js
+const custom = await customMonitor.getData();
+ws.send(JSON.stringify({ custom }));
+
+// public/app.js
+function updateCustomData(data) {
+  // Actualizar UI
+}
+
+Limitaciones Conocidas:
+----------------------
+
+• macOS/Windows: Acceso limitado a IRQs reales
+• Requiere Node.js moderno (>=14)
+• WebSocket requiere conexión activa
+• Datos en Linux requieren permisos root
+• No funciona en navegadores antiguos
+
+Seguridad:
+---------
+
+• Solo lectura de datos del sistema
+• No modifica registros
+• No requiere credenciales
+• WebSocket en localhost
+• Sin autenticación (uso local)
+
+Contribuciones:
+--------------
+
+Para contribuir:
+1. Fork el repositorio
+2. Crea una rama feature
+3. Implementa cambios
+4. Prueba en múltiples plataformas
+5. Envía Pull Request
+
+Licencia: MIT

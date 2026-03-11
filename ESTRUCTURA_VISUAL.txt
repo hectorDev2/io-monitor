@@ -1,0 +1,162 @@
+# 🎯 RESUMEN VISUAL - CONTROLADORES SEPARADOS
+
+```
+╔═══════════════════════════════════════════════════════════════════════════╗
+║                    MONITOR DE E/S Y REGISTROS DEL SISTEMA                 ║
+║                      [Estado: Conectado] [Última actualización]           ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+┌─────────────────────────────────────────────────────────────────────────┐
+│  Sistema: darwin  │  Arquitectura: arm64  │  CPUs: 8  │  Hostname: ...  │
+└─────────────────────────────────────────────────────────────────────────┘
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  ⌨️  CONTROLADOR DE TECLADO (i8042)                                       ║
+║  [Puerto 0x60/0x64]  [IRQ 1]  [Estado: Activo]                           ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  ┌────────────────────────────────────────────────────────────────────┐  ║
+║  │  ✍️  Buffer de Texto                                               │  ║
+║  │  ┌──────────────────────────────────────────────────────────────┐ │  ║
+║  │  │  Hola mundo                                                   │ │  ║
+║  │  │  Este es el texto que estoy escribiendo...                   │ │  ║
+║  │  └──────────────────────────────────────────────────────────────┘ │  ║
+║  │  Caracteres: 47  │  Última tecla: O  │  [Limpiar Buffer]         │  ║
+║  └────────────────────────────────────────────────────────────────────┘  ║
+║                                                                            ║
+║  ┌────────────────────────────────────────────────────────────────────┐  ║
+║  │  🔧 Registros del Controlador de Teclado                          │  ║
+║  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────┐ │  ║
+║  │  │ Data Reg     │  │ Status Reg   │  │ Command Reg  │  │ Control│ │  ║
+║  │  │ Puerto 0x60  │  │ Puerto 0x64  │  │ Puerto 0x64  │  │ Config │ │  ║
+║  │  │              │  │ (Read)       │  │ (Write)      │  │        │ │  ║
+║  │  │   0x1E       │  │   0x01       │  │   0x20       │  │  0x45  │ │  ║
+║  │  │  00011110    │  │  00000001    │  │  00100000    │  │ 0100.. │ │  ║
+║  │  │ Scan codes   │  │ [OBF] ✓      │  │ Comandos     │  │ [IRQ1] │ │  ║
+║  │  │              │  │ [IBF]        │  │              │  │   ✓    │ │  ║
+║  │  └──────────────┘  └──────────────┘  └──────────────┘  └────────┘ │  ║
+║  └────────────────────────────────────────────────────────────────────┘  ║
+║                                                                            ║
+║  ┌────────────────────────────────────────────────────────────────────┐  ║
+║  │  ⚡ Eventos del Teclado                                            │  ║
+║  │  ✅ Modo: Captura DIRECTA del HARDWARE (/dev/input)                │  ║
+║  │  ┌──────────────────────────────────────────────────────────────┐ │  ║
+║  │  │ Tiempo     │ Acción │ Tecla │ Scan Code │ Valor │ Puerto │Reg│ │  ║
+║  │  ├──────────────────────────────────────────────────────────────┤ │  ║
+║  │  │ 14:32:15.234 │ PRESS  │  A   │ 30 (0x1E) │ 1     │ 0x60  │..│ │  ║
+║  │  │ 14:32:15.456 │ RELEASE│  A   │ 30 (0x1E) │ 0     │ 0x60  │..│ │  ║
+║  │  │ 14:32:16.123 │ PRESS  │ SPACE│ 57 (0x39) │ 1     │ 0x60  │..│ │  ║
+║  │  └──────────────────────────────────────────────────────────────┘ │  ║
+║  └────────────────────────────────────────────────────────────────────┘  ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+
+╔═══════════════════════════════════════════════════════════════════════════╗
+║  🖱️  CONTROLADOR DE MOUSE (PS/2)                                         ║
+║  [Puerto 0x60/0x64]  [IRQ 12]  [Estado: Activo]                          ║
+╠═══════════════════════════════════════════════════════════════════════════╣
+║                                                                            ║
+║  ┌────────────────────────────────────────────────────────────────────┐  ║
+║  │  📊 Estado del Mouse                                               │  ║
+║  │  ┌──────────┐  ┌──────────┐  ┌──────────┐  ┌──────────┐          │  ║
+║  │  │Posición X│  │Posición Y│  │Movimient.│  │ Clicks  │          │  ║
+║  │  │   542    │  │   318    │  │   1247   │  │   23    │          │  ║
+║  │  └──────────┘  └──────────┘  └──────────┘  └──────────┘          │  ║
+║  └────────────────────────────────────────────────────────────────────┘  ║
+║                                                                            ║
+║  ┌────────────────────────────────────────────────────────────────────┐  ║
+║  │  🔧 Registros del Controlador de Mouse                            │  ║
+║  │  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌────────┐ │  ║
+║  │  │ Data Reg     │  │ Status Reg   │  │ Command Reg  │  │ Control│ │  ║
+║  │  │ Puerto 0x60  │  │ Puerto 0x64  │  │ Puerto 0x64  │  │ Config │ │  ║
+║  │  │              │  │ (Read)       │  │ (Write)      │  │        │ │  ║
+║  │  │   0x08       │  │   0x21       │  │   0xD4       │  │  0x47  │ │  ║
+║  │  │  00001000    │  │  00100001    │  │  11010100    │  │ 0100.. │ │  ║
+║  │  │ Datos mouse  │  │ [OBF] ✓      │  │ Write mouse  │  │ [IRQ12]│ │  ║
+║  │  │ (3-4 bytes)  │  │ [AUX] ✓      │  │              │  │   ✓    │ │  ║
+║  │  └──────────────┘  └──────────────┘  └──────────────┘  └────────┘ │  ║
+║  └────────────────────────────────────────────────────────────────────┘  ║
+║                                                                            ║
+║  ┌────────────────────────────────────────────────────────────────────┐  ║
+║  │  ⚡ Eventos del Mouse                                               │  ║
+║  │  ✅ Modo: Captura DIRECTA del HARDWARE (/dev/input)                │  ║
+║  │  ┌──────────────────────────────────────────────────────────────┐ │  ║
+║  │  │ Tiempo     │ Tipo │ Eje/Botón│ Valor│ Raw  │ Puerto │ Reg  │ │  ║
+║  │  ├──────────────────────────────────────────────────────────────┤ │  ║
+║  │  │ 14:32:20.123 │ MOVE │    X    │  +5  │ ...  │ 0x60  │ ... │ │  ║
+║  │  │ 14:32:20.145 │ MOVE │    Y    │  -3  │ ...  │ 0x60  │ ... │ │  ║
+║  │  │ 14:32:21.234 │ PRESS│LEFT_CLK │   1  │ ...  │ 0x60  │ ... │ │  ║
+║  │  └──────────────────────────────────────────────────────────────┘ │  ║
+║  └────────────────────────────────────────────────────────────────────┘  ║
+╚═══════════════════════════════════════════════════════════════════════════╝
+
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│  ⚡ Interrupciones (IRQs)                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────┐ │
+│  │ IRQ │ Dispositivo      │ Tipo     │ Total   │ Delta │ Actividad   │ │
+│  ├─────────────────────────────────────────────────────────────────────┤ │
+│  │  1  │ i8042 keyboard   │ keyboard │ 45,231  │ +12   │ ████████    │ │
+│  │ 12  │ i8042 aux (PS/2) │ mouse    │ 23,456  │ +8    │ ██████      │ │
+│  │  8  │ rtc0             │ timer    │ 1,234   │ +1    │ █           │ │
+│  └─────────────────────────────────────────────────────────────────────┘ │
+└───────────────────────────────────────────────────────────────────────────┘
+
+┌───────────────────────────────────────────────────────────────────────────┐
+│  💾 Estadísticas de E/S                                                   │
+│  [Lecturas/Escrituras de disco en tiempo real]                           │
+└───────────────────────────────────────────────────────────────────────────┘
+
+```
+
+## 🎨 CÓDIGO DE COLORES
+
+- **AZUL (`#00d9ff`)**: Todo lo relacionado con TECLADO
+  - Bordes de sección
+  - Títulos
+  - Badges
+  - Registros
+  - Eventos en tablas
+
+- **VERDE (`#00ff88`)**: Todo lo relacionado con MOUSE
+  - Bordes de sección
+  - Títulos
+  - Badges
+  - Registros
+  - Eventos en tablas
+
+## 🔑 ELEMENTOS CLAVE
+
+### Para Teclado:
+1. **Buffer de Texto**: Muestra exactamente lo que escribes
+2. **4 Registros**: Data, Status, Command, Control
+3. **Tabla de Eventos**: Solo teclas presionadas/soltadas
+4. **Flag IRQ1**: Se ilumina al presionar teclas
+
+### Para Mouse:
+1. **Estadísticas**: Posición X/Y, movimientos, clicks
+2. **4 Registros**: Data, Status, Command, Control
+3. **Tabla de Eventos**: Solo movimientos y clicks del mouse
+4. **Flag IRQ12**: Se ilumina al mover/clickear
+
+## 📱 NAVEGACIÓN
+
+```
+Scroll ↓
+  ├─ Ver controlador de TECLADO completo
+  │  └─ Presiona teclas → Ve registros y eventos
+  │
+  ├─ Scroll más ↓
+  │
+  └─ Ver controlador de MOUSE completo
+     └─ Mueve mouse → Ve registros y eventos
+```
+
+## ✅ VENTAJAS
+
+1. **Separación Clara**: No hay confusión entre dispositivos
+2. **Colores Consistentes**: Azul = teclado, Verde = mouse
+3. **Información Contextual**: Todo relacionado está junto
+4. **Educativo**: Fácil entender cómo funciona cada controlador
+5. **Escalable**: Fácil agregar más controladores en el futuro
