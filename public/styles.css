@@ -1307,3 +1307,135 @@ tbody td code {
         justify-content: center;
     }
 }
+
+/* ========================================
+   SISTEMA DE PESTAÑAS (TABS)
+   ======================================== */
+
+.tabs-container {
+    background: var(--bg-secondary);
+    border-radius: 12px;
+    border: 1px solid var(--border-color);
+    overflow: hidden;
+}
+
+.tabs-header {
+    display: flex;
+    background: var(--bg-primary);
+    border-bottom: 2px solid var(--border-color);
+    overflow-x: auto;
+    overflow-y: hidden;
+}
+
+.tab-button {
+    flex: 1;
+    min-width: 120px;
+    padding: 18px 24px;
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: var(--text-secondary);
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+}
+
+.tab-button:hover {
+    background: rgba(255, 255, 255, 0.05);
+    color: var(--text-primary);
+}
+
+.tab-button.active {
+    background: var(--bg-secondary);
+    color: var(--accent-blue);
+    border-bottom-color: var(--accent-blue);
+}
+
+.tab-button[data-tab="keyboard"].active {
+    color: var(--accent-blue);
+    border-bottom-color: var(--accent-blue);
+}
+
+.tab-button[data-tab="mouse"].active {
+    color: var(--accent-green);
+    border-bottom-color: var(--accent-green);
+}
+
+.tab-button[data-tab="ide"].active {
+    color: #ff8800;
+    border-bottom-color: #ff8800;
+}
+
+.tab-button[data-tab="sata"].active {
+    color: #aa44ff;
+    border-bottom-color: #aa44ff;
+}
+
+.tab-button[data-tab="nvme"].active {
+    color: #ffcc00;
+    border-bottom-color: #ffcc00;
+}
+
+.tab-button[data-tab="interrupts"].active {
+    color: var(--accent-yellow);
+    border-bottom-color: var(--accent-yellow);
+}
+
+.tab-icon {
+    font-size: 1.8rem;
+}
+
+.tab-label {
+    font-size: 0.85rem;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.tabs-content {
+    padding: 20px;
+}
+
+.tab-pane {
+    display: none;
+    animation: fadeIn 0.3s ease-in;
+}
+
+.tab-pane.active {
+    display: block;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Responsive tabs */
+@media (max-width: 768px) {
+    .tabs-header {
+        flex-wrap: wrap;
+    }
+    
+    .tab-button {
+        min-width: 100px;
+        padding: 12px 16px;
+    }
+    
+    .tab-icon {
+        font-size: 1.4rem;
+    }
+    
+    .tab-label {
+        font-size: 0.75rem;
+    }
+}

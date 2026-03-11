@@ -1075,12 +1075,60 @@ function sendBrowserEvent(eventData) {
     }
 }
 
+// ========================================
+// SISTEMA DE PESTAÑAS (TABS)
+// ========================================
+
+/**
+ * Inicializa el sistema de pestañas
+ */
+function initTabs() {
+    const tabButtons = document.querySelectorAll('.tab-button');
+    
+    tabButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const tabId = button.getAttribute('data-tab');
+            switchTab(tabId);
+        });
+    });
+}
+
+/**
+ * Cambia a una pestaña específica
+ */
+function switchTab(tabId) {
+    // Remover clase active de todos los botones y paneles
+    document.querySelectorAll('.tab-button').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    document.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active');
+    });
+    
+    // Agregar clase active al botón y panel seleccionado
+    const activeButton = document.querySelector(`.tab-button[data-tab="${tabId}"]`);
+    const activePane = document.getElementById(`tab-${tabId}`);
+    
+    if (activeButton) activeButton.classList.add('active');
+    if (activePane) activePane.classList.add('active');
+    
+    // Redimensionar canvas si estamos en la pestaña de interrupciones
+    if (tabId === 'interrupts' && registersCanvas) {
+        setTimeout(() => {
+            const container = registersCanvas.parentElement;
+            registersCanvas.width = container.clientWidth;
+            registersCanvas.height = 300;
+        }, 100);
+    }
+}
+
 // Inicializar aplicación
 document.addEventListener('DOMContentLoaded', () => {
     loadSystemInfo();
     connectWebSocket();
     initRegistersCanvas();
     setupBrowserEventCapture();
+    initTabs();
 });
 
 // Limpiar al cerrar

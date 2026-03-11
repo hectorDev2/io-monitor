@@ -37,9 +37,42 @@
 
         <div class="main-content">
             <!-- ============================================
-                 CONTROLADOR DE TECLADO (i8042 - Keyboard)
+                 SISTEMA DE PESTAÑAS PARA CONTROLADORES
                  ============================================ -->
-            <div class="controller-section keyboard-section">
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-button active" data-tab="keyboard">
+                        <span class="tab-icon">⌨️</span>
+                        <span class="tab-label">Teclado</span>
+                    </button>
+                    <button class="tab-button" data-tab="mouse">
+                        <span class="tab-icon">🖱️</span>
+                        <span class="tab-label">Mouse</span>
+                    </button>
+                    <button class="tab-button" data-tab="ide">
+                        <span class="tab-icon">💿</span>
+                        <span class="tab-label">IDE/ATA</span>
+                    </button>
+                    <button class="tab-button" data-tab="sata">
+                        <span class="tab-icon">💽</span>
+                        <span class="tab-label">SATA</span>
+                    </button>
+                    <button class="tab-button" data-tab="nvme">
+                        <span class="tab-icon">⚡</span>
+                        <span class="tab-label">NVMe</span>
+                    </button>
+                    <button class="tab-button" data-tab="interrupts">
+                        <span class="tab-icon">⚡</span>
+                        <span class="tab-label">Interrupciones</span>
+                    </button>
+                </div>
+
+                <div class="tabs-content">
+                    <!-- ============================================
+                         PESTAÑA: CONTROLADOR DE TECLADO
+                         ============================================ -->
+                    <div class="tab-pane active" id="tab-keyboard">
+                        <div class="controller-section keyboard-section">
                 <div class="controller-header">
                     <h1 class="controller-title">
                         <span class="icon">⌨️</span>
@@ -176,11 +209,14 @@
                     </div>
                 </section>
             </div>
+                    </div>
+                    <!-- Fin Pestaña Teclado -->
 
-            <!-- ============================================
-                 CONTROLADOR DE MOUSE (PS/2 Mouse)
-                 ============================================ -->
-            <div class="controller-section mouse-section">
+                    <!-- ============================================
+                         PESTAÑA: CONTROLADOR DE MOUSE
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-mouse">
+                        <div class="controller-section mouse-section">
                 <div class="controller-header">
                     <h1 class="controller-title">
                         <span class="icon">🖱️</span>
@@ -325,52 +361,14 @@
                     </div>
                 </section>
             </div>
-
-
-
-            <!-- Sección de Interrupciones -->
-            <section class="panel">
-                <h2>
-                    <span class="icon">⚡</span>
-                    Interrupciones (IRQs)
-                    <span class="subtitle">Actualizaciones en tiempo real</span>
-                </h2>
-                <div class="panel-header">
-                    <div class="legend">
-                        <span class="legend-item"><span class="badge keyboard"></span> Teclado</span>
-                        <span class="legend-item"><span class="badge mouse"></span> Mouse</span>
-                        <span class="legend-item"><span class="badge disk"></span> Disco</span>
-                        <span class="legend-item"><span class="badge network"></span> Red</span>
-                        <span class="legend-item"><span class="badge usb"></span> USB</span>
-                        <span class="legend-item"><span class="badge display"></span> Display</span>
                     </div>
-                </div>
-                <div class="table-container">
-                    <table id="interruptsTable">
-                        <thead>
-                            <tr>
-                                <th>IRQ</th>
-                                <th>Dispositivo</th>
-                                <th>Tipo</th>
-                                <th>Total</th>
-                                <th>Delta</th>
-                                <th>Actividad</th>
-                            </tr>
-                        </thead>
-                        <tbody id="interruptsBody">
-                            <tr>
-                                <td colspan="6" class="loading">Esperando datos...</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </section>
+                    <!-- Fin Pestaña Mouse -->
 
-            <!-- ========================================
-                 CONTROLADORES DE DISCO
-                 ======================================== -->
-            
-            <!-- Controlador IDE/ATA (Primary & Secondary) -->
+                    <!-- ============================================
+                         PESTAÑA: IDE/ATA
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-ide">
+                        <!-- Controlador IDE/ATA (Primary & Secondary) -->
             <div class="controller-section ide-section">
                 <div class="controller-header">
                     <div class="controller-title">
@@ -475,11 +473,17 @@
                     <h3>Dispositivos Detectados</h3>
                     <div id="ideDevices" class="device-chips">
                         <span class="device-chip">sda: 500 GB</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+                    </div>
+                    <!-- Fin Pestaña IDE -->
 
-            <!-- Controlador SATA (AHCI) -->
+                    <!-- ============================================
+                         PESTAÑA: SATA
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-sata">
+                        <!-- Controlador SATA (AHCI) -->
             <div class="controller-section sata-section">
                 <div class="controller-header">
                     <div class="controller-title">
@@ -587,12 +591,18 @@
                     <h3>Dispositivos Detectados</h3>
                     <div id="sataDevices" class="device-chips">
                         <span class="device-chip">sda: 1 TB SSD</span>
+                        </div>
                     </div>
                 </div>
-            </div>
+                    </div>
+                    <!-- Fin Pestaña SATA -->
 
-            <!-- Controlador NVMe -->
-            <div class="controller-section nvme-section">
+                    <!-- ============================================
+                         PESTAÑA: NVMe
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-nvme">
+                        <!-- Controlador NVMe -->
+                        <div class="controller-section nvme-section">
                 <div class="controller-header">
                     <div class="controller-title">
                         <span class="icon">⚡</span>
@@ -698,47 +708,99 @@
                     <h3>Dispositivos Detectados</h3>
                     <div id="nvmeDevices" class="device-chips">
                         <span class="device-chip">nvme0n1: 512 GB NVMe SSD</span>
+                         </div>
                     </div>
                 </div>
-            </div>
+                    </div>
+                    <!-- Fin Pestaña NVMe -->
 
-            <!-- Sección de Puertos E/S (Linux) -->
-            <section class="panel" id="portsSection" style="display: none;">
+                    <!-- ============================================
+                         PESTAÑA: INTERRUPCIONES
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-interrupts">
+                        <!-- Sección de Interrupciones -->
+                        <section class="panel">
                 <h2>
-                    <span class="icon">🔌</span>
-                    Puertos de E/S
-                    <span class="subtitle">Rangos de puertos asignados</span>
+                    <span class="icon">⚡</span>
+                    Interrupciones (IRQs)
+                    <span class="subtitle">Actualizaciones en tiempo real</span>
                 </h2>
+                <div class="panel-header">
+                    <div class="legend">
+                        <span class="legend-item"><span class="badge keyboard"></span> Teclado</span>
+                        <span class="legend-item"><span class="badge mouse"></span> Mouse</span>
+                        <span class="legend-item"><span class="badge disk"></span> Disco</span>
+                        <span class="legend-item"><span class="badge network"></span> Red</span>
+                        <span class="legend-item"><span class="badge usb"></span> USB</span>
+                        <span class="legend-item"><span class="badge display"></span> Display</span>
+                    </div>
+                </div>
                 <div class="table-container">
-                    <table id="portsTable">
+                    <table id="interruptsTable">
                         <thead>
                             <tr>
-                                <th>Inicio</th>
-                                <th>Fin</th>
+                                <th>IRQ</th>
                                 <th>Dispositivo</th>
+                                <th>Tipo</th>
+                                <th>Total</th>
+                                <th>Delta</th>
+                                <th>Actividad</th>
                             </tr>
                         </thead>
-                        <tbody id="portsBody">
+                        <tbody id="interruptsBody">
                             <tr>
-                                <td colspan="3" class="loading">Esperando datos...</td>
+                                <td colspan="6" class="loading">Esperando datos...</td>
                             </tr>
                         </tbody>
-                    </table>
-                </div>
-            </section>
+                        </table>
+                    </div>
+                </section>
 
-            <!-- Visualización de Registros -->
-            <section class="panel">
+                        <!-- Sección de Puertos E/S (Linux) -->
+                        <section class="panel" id="portsSection" style="display: none;">
+                            <h2>
+                                <span class="icon">🔌</span>
+                                Puertos de E/S
+                                <span class="subtitle">Rangos de puertos asignados</span>
+                            </h2>
+                            <div class="table-container">
+                                <table id="portsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Inicio</th>
+                                            <th>Fin</th>
+                                            <th>Dispositivo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="portsBody">
+                                        <tr>
+                                            <td colspan="3" class="loading">Esperando datos...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Visualización de Registros -->
+                        <section class="panel">
                 <h2>
                     <span class="icon">📊</span>
                     Visualización de Registros
                     <span class="subtitle">Actividad de registros en tiempo real</span>
                 </h2>
-                <div class="registers-container">
-                    <canvas id="registersCanvas"></canvas>
+                        <div class="registers-container">
+                            <canvas id="registersCanvas"></canvas>
+                        </div>
+                    </section>
+                    </div>
+                    <!-- Fin Pestaña Interrupciones -->
+
                 </div>
-            </section>
+                <!-- Fin tabs-content -->
+            </div>
+            <!-- Fin tabs-container -->
         </div>
+        <!-- Fin main-content -->
 
         <footer>
             <p>Última actualización: <span id="lastUpdate">-</span></p>
