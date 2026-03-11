@@ -1,0 +1,20 @@
+{
+  "name": "io-monitor",
+  "version": "1.0.0",
+  "description": "Sistema de visualización en tiempo real de operaciones de E/S y registros del sistema",
+  "main": "src/server.js",
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "nodemon src/server.js"
+  },
+  "keywords": ["io", "interrupts", "system", "monitoring", "educational"],
+  "author": "",
+  "license": "MIT",
+  "dependencies": {
+    "ws": "^8.14.2",
+    "express": "^4.18.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
