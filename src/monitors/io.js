@@ -33,8 +33,7 @@ class IOMonitor {
     return new Promise((resolve) => {
       fs.readFile('/proc/diskstats', 'utf8', (err, data) => {
         if (err) {
-          // Si no podemos leer diskstats, devolvemos datos simulados
-          resolve(this.getSimulatedIOStats());
+          resolve({ devices: [], error: 'Cannot read /proc/diskstats. Need root access.' });
           return;
         }
 
@@ -85,68 +84,14 @@ class IOMonitor {
    * Obtiene estadísticas de E/S en macOS usando iostat
    */
   async getMacIOStats() {
-    return new Promise((resolve) => {
-      exec('iostat -d -c 2 -w 1', (error, stdout) => {
-        if (error) {
-          resolve(this.getSimulatedIOStats());
-          return;
-        }
-
-        // Parsear salida de iostat
-        const devices = this.parseIOStatOutput(stdout);
-        resolve({ devices, platform: 'darwin' });
-      });
-    });
+    return { devices: [], error: 'macOS not supported. Use Linux for real hardware monitoring.' };
   }
 
   /**
    * Obtiene estadísticas de E/S en Windows usando WMI
    */
   async getWindowsIOStats() {
-    return new Promise((resolve) => {
-      exec('wmic diskdrive get Name,BytesPerSector,TotalSectors /format:csv', (error, stdout) => {
-        if (error) {
-          resolve(this.getSimulatedIOStats());
-          return;
-        }
-
-        // Simular estadísticas de E/S para Windows
-        resolve(this.getSimulatedIOStats());
-      });
-    });
-  }
-
-  /**
-   * Parsea la salida de iostat (macOS)
-   */
-  parseIOStatOutput(output) {
-    const devices = [];
-    const lines = output.trim().split('\n');
-    
-    // Formato simplificado - iostat muestra dispositivos
-    // Por ahora retornamos datos simulados para macOS
-    return this.getSimulatedIOStats().devices;
-  }
-
-  /**
-   * Genera datos simulados de E/S cuando no hay acceso directo
-   */
-  getSimulatedIOStats() {
-    const devices = [
-      {
-        name: 'disk0',
-        type: 'disk',
-        reads: Math.floor(Math.random() * 100000) + 50000,
-        writes: Math.floor(Math.random() * 80000) + 30000,
-        readBytes: Math.floor(Math.random() * 10000000000),
-        writeBytes: Math.floor(Math.random() * 8000000000),
-        readsDelta: Math.floor(Math.random() * 10),
-        writesDelta: Math.floor(Math.random() * 5),
-        active: Math.random() > 0.5
-      }
-    ];
-
-    return { devices, simulated: true };
+    return { devices: [], error: 'Windows not supported. Use Linux for real hardware monitoring.' };
   }
 
   /**
@@ -157,8 +102,7 @@ class IOMonitor {
       return await this.getLinuxInputEvents();
     }
     
-    // Para otros sistemas, simulamos eventos basados en actividad
-    return this.getSimulatedInputEvents();
+    return { error: 'Only Linux supported for real input monitoring.' };
   }
 
   /**
@@ -169,7 +113,7 @@ class IOMonitor {
       // Verificar si hay dispositivos de input accesibles
       fs.readdir('/dev/input', (err, files) => {
         if (err) {
-          resolve(this.getSimulatedInputEvents());
+          resolve({ error: 'Cannot access /dev/input. Need root access.' });
           return;
         }
 
@@ -191,27 +135,6 @@ class IOMonitor {
         });
       });
     });
-  }
-
-  /**
-   * Simula eventos de input
-   */
-  getSimulatedInputEvents() {
-    return {
-      keyboard: {
-        device: 'Keyboard',
-        events: Math.floor(Math.random() * 100),
-        lastKey: Math.random() > 0.5 ? 'A' : null
-      },
-      mouse: {
-        device: 'Mouse',
-        events: Math.floor(Math.random() * 200),
-        x: Math.floor(Math.random() * 1920),
-        y: Math.floor(Math.random() * 1080),
-        clicks: Math.floor(Math.random() * 10)
-      },
-      simulated: true
-    };
   }
 
   /**

@@ -226,100 +226,8 @@ function updateDiskController(type, devices) {
  * Actualiza los registros de un controlador de disco
  */
 function updateDiskRegisters(type, device) {
-    // Simular valores de registros basados en actividad
-    if (type === 'ide') {
-        // Actualizar registros IDE
-        if (device.readsDelta > 0 || device.writesDelta > 0) {
-            const dataReg = document.getElementById('ideDataRegister');
-            const statusReg = document.getElementById('ideStatusRegister');
-            
-            if (dataReg) {
-                const dataValue = Math.floor(Math.random() * 256);
-                updateRegisterBox('ideDataRegister', `0x${dataValue.toString(16).padStart(2, '0').toUpperCase()}`, null);
-            }
-            
-            if (statusReg) {
-                // Bit 7: BSY (busy), Bit 6: DRDY (drive ready), Bit 3: DRQ (data request)
-                const status = device.writesDelta > 0 ? 0x58 : 0x50; // Con o sin DRQ
-                updateRegisterBox('ideStatusRegister', `0x${status.toString(16).padStart(2, '0').toUpperCase()}`, null);
-                
-                // Actualizar flags
-                const busyFlag = document.getElementById('ide-flag-busy');
-                const drdyFlag = document.getElementById('ide-flag-drdy');
-                const errFlag = document.getElementById('ide-flag-err');
-                
-                if (busyFlag) {
-                    if (device.active) {
-                        busyFlag.classList.add('flag-active');
-                        setTimeout(() => busyFlag.classList.remove('flag-active'), 500);
-                    }
-                }
-                
-                if (drdyFlag) drdyFlag.classList.add('flag-active');
-                if (errFlag) errFlag.classList.remove('flag-active');
-            }
-            
-            // Command register - simular último comando
-            const command = device.writesDelta > 0 ? 0x30 : 0x20; // WRITE/READ SECTORS
-            updateRegisterBox('ideCommandRegister', `0x${command.toString(16).padStart(2, '0').toUpperCase()}`, null);
-            
-            // LBA register - dirección aleatoria
-            const lba = Math.floor(Math.random() * 0xFFFFFF);
-            updateRegisterBox('ideLBARegister', `0x${lba.toString(16).padStart(8, '0').toUpperCase()}`, null);
-        }
-    } else if (type === 'sata') {
-        // Actualizar registros SATA/AHCI
-        if (device.readsDelta > 0 || device.writesDelta > 0) {
-            // Port Status - enlace activo
-            updateRegisterBox('sataPortStatusRegister', '0x123', null);
-            
-            // Command Register
-            const cmdValue = 0x0017; // ST + FRE + POD + SUD
-            updateRegisterBox('sataCommandRegister', `0x${cmdValue.toString(16).padStart(4, '0').toUpperCase()}`, null);
-            
-            // Task File Data
-            const tfdValue = device.active ? 0x50 : 0x00;
-            updateRegisterBox('sataTFDataRegister', `0x${tfdValue.toString(16).padStart(2, '0').toUpperCase()}`, null);
-            
-            // Actualizar flags
-            const detFlag = document.getElementById('sata-flag-det');
-            const spdFlag = document.getElementById('sata-flag-spd');
-            const stFlag = document.getElementById('sata-flag-st');
-            const freFlag = document.getElementById('sata-flag-fre');
-            
-            if (detFlag) detFlag.classList.add('flag-active');
-            if (spdFlag) spdFlag.classList.add('flag-active');
-            if (stFlag && device.active) {
-                stFlag.classList.add('flag-active');
-                setTimeout(() => stFlag.classList.remove('flag-active'), 500);
-            }
-            if (freFlag && device.active) {
-                freFlag.classList.add('flag-active');
-            }
-        }
-    } else if (type === 'nvme') {
-        // Actualizar registros NVMe
-        if (device.readsDelta > 0 || device.writesDelta > 0) {
-            // Controller Status
-            updateRegisterBox('nvmeStatusRegister', '0x01', null); // RDY bit set
-            
-            // Controller Config
-            updateRegisterBox('nvmeConfigRegister', '0x460001', null);
-            
-            // Doorbell - incrementar cuando hay actividad
-            const doorbellValue = Math.floor(Math.random() * 256);
-            updateRegisterBox('nvmeDoorbellRegister', `0x${doorbellValue.toString(16).padStart(4, '0').toUpperCase()}`, null);
-            
-            // Actualizar flags
-            const rdyFlag = document.getElementById('nvme-flag-rdy');
-            const cfsFlag = document.getElementById('nvme-flag-cfs');
-            const enFlag = document.getElementById('nvme-flag-en');
-            
-            if (rdyFlag) rdyFlag.classList.add('flag-active');
-            if (cfsFlag) cfsFlag.classList.remove('flag-active');
-            if (enFlag) enFlag.classList.add('flag-active');
-        }
-    }
+    // Los registros se actualizarán solo con datos REALES del sistema
+    // No hay simulación de valores
 }
 
 /**
@@ -796,42 +704,22 @@ function updateTextBuffer(event) {
  * Actualiza los registros del controlador de teclado
  */
 function updateKeyboardRegisters(event) {
-    // Data Register (Puerto 0x60)
+    // Data Register (Puerto 0x60) - Solo con datos REALES
     updateRegisterBox('keyboardDataRegister', event.register.value, event.scanCode);
     
-    // Status Register (Puerto 0x64)
-    const statusValue = simulateStatusRegister(event);
-    updateRegisterBox('keyboardStatusRegister', statusValue, null);
-    updateStatusFlags('keyboard', statusValue);
-    
-    // Command Register
-    updateRegisterBox('keyboardCommandRegister', '0x20', null); // Read command byte
-    
-    // Control Register
-    const controlValue = simulateControlRegister(event);
-    updateRegisterBox('keyboardControlRegister', controlValue, null);
-    updateControlFlags('keyboard', event.device);
+    // Los demás registros solo se actualizarán con datos REALES del hardware
+    // No hay simulación de Status, Command o Control Registers
 }
 
 /**
  * Actualiza los registros del controlador de mouse
  */
 function updateMouseRegisters(event) {
-    // Data Register (Puerto 0x60)
+    // Data Register (Puerto 0x60) - Solo con datos REALES
     updateRegisterBox('mouseDataRegister', event.register.value, event.value);
     
-    // Status Register (Puerto 0x64)
-    const statusValue = simulateStatusRegister(event);
-    updateRegisterBox('mouseStatusRegister', statusValue, null);
-    updateStatusFlags('mouse', statusValue);
-    
-    // Command Register
-    updateRegisterBox('mouseCommandRegister', '0xD4', null); // Write to mouse
-    
-    // Control Register
-    const controlValue = simulateControlRegister(event);
-    updateRegisterBox('mouseControlRegister', controlValue, null);
-    updateControlFlags('mouse', event.device);
+    // Los demás registros solo se actualizarán con datos REALES del hardware
+    // No hay simulación de Status, Command o Control Registers
 }
 
 /**
@@ -883,94 +771,6 @@ function updateRegisterBox(registerId, hexValue, scanCode) {
     if (activityEl) {
         activityEl.innerHTML = '<span class="activity-pulse">●</span>';
         setTimeout(() => activityEl.innerHTML = '', 500);
-    }
-}
-
-/**
- * Simula el valor del Status Register
- */
-function simulateStatusRegister(event) {
-    let status = 0x00;
-    
-    // Bit 0: OBF (Output Buffer Full) - Hay datos disponibles para leer
-    if (event.action === 'PRESS') {
-        status |= 0x01;
-    }
-    
-    // Bit 1: IBF (Input Buffer Full) - El buffer de entrada está lleno
-    status |= 0x00; // Normalmente vacío después de procesar
-    
-    // Bit 5: Mouse Data
-    if (event.device === 'mouse') {
-        status |= 0x20;
-    }
-    
-    return `0x${status.toString(16).padStart(2, '0').toUpperCase()}`;
-}
-
-/**
- * Actualiza los flags del Status Register
- */
-function updateStatusFlags(controller, statusValue) {
-    const status = parseInt(statusValue.substring(2), 16);
-    
-    const obfFlagId = controller === 'keyboard' ? 'keyboard-flag-obf' : 'mouse-flag-obf';
-    const ibfFlagId = controller === 'keyboard' ? 'keyboard-flag-ibf' : 'mouse-flag-auxdata';
-    
-    const obfFlag = document.getElementById(obfFlagId);
-    if (obfFlag) {
-        if (status & 0x01) {
-            obfFlag.classList.add('flag-active');
-            setTimeout(() => obfFlag.classList.remove('flag-active'), 500);
-        } else {
-            obfFlag.classList.remove('flag-active');
-        }
-    }
-    
-    const ibfFlag = document.getElementById(ibfFlagId);
-    if (ibfFlag) {
-        if (status & 0x02) {
-            ibfFlag.classList.add('flag-active');
-            setTimeout(() => ibfFlag.classList.remove('flag-active'), 500);
-        } else {
-            ibfFlag.classList.remove('flag-active');
-        }
-    }
-}
-
-/**
- * Simula el valor del Control Register
- */
-function simulateControlRegister(event) {
-    let control = 0x45; // Configuración típica
-    
-    // Bit 0: IRQ1 habilitado (teclado)
-    control |= 0x01;
-    
-    // Bit 1: IRQ12 habilitado (mouse)
-    if (event.device === 'mouse') {
-        control |= 0x02;
-    }
-    
-    return `0x${control.toString(16).padStart(2, '0').toUpperCase()}`;
-}
-
-/**
- * Actualiza los flags del Control Register
- */
-function updateControlFlags(controller, device) {
-    if (controller === 'keyboard') {
-        const irq1Flag = document.getElementById('keyboard-flag-irq1');
-        if (irq1Flag && device === 'keyboard') {
-            irq1Flag.classList.add('flag-active');
-            setTimeout(() => irq1Flag.classList.remove('flag-active'), 500);
-        }
-    } else if (controller === 'mouse') {
-        const irq12Flag = document.getElementById('mouse-flag-irq12');
-        if (irq12Flag && device === 'mouse') {
-            irq12Flag.classList.add('flag-active');
-            setTimeout(() => irq12Flag.classList.remove('flag-active'), 500);
-        }
     }
 }
 
@@ -1075,6 +875,8 @@ function sendBrowserEvent(eventData) {
     }
 }
 
+
+
 // ========================================
 // SISTEMA DE PESTAÑAS (TABS)
 // ========================================
@@ -1119,6 +921,325 @@ function switchTab(tabId) {
             registersCanvas.width = container.clientWidth;
             registersCanvas.height = 300;
         }, 100);
+    }
+}
+
+// ============================================
+// SISTEMA DE PESTAÑAS (TABS)
+// ============================================
+
+// Simulador del Controlador de Teclado
+function initKeyboardSimulator() {
+    const commandSelect = document.getElementById('keyboardCommand');
+    const sendButton = document.getElementById('sendKeyboardCommand');
+    const output = document.getElementById('keyboardSimulatorOutput');
+    
+    if (!commandSelect || !sendButton || !output) return;
+    
+    sendButton.addEventListener('click', () => {
+        const command = commandSelect.value;
+        const option = commandSelect.options[commandSelect.selectedIndex];
+        const description = option.textContent;
+        
+        simulateKeyboardCommand(command, description, output);
+    });
+}
+
+function simulateKeyboardCommand(command, description, outputEl) {
+    const timestamp = new Date().toLocaleTimeString();
+    const commandValue = parseInt(command, 16);
+    
+    // Definir respuestas simuladas para cada comando
+    const responses = {
+        0x20: { 
+            ack: '0xFA',
+            data: '0x65',
+            desc: 'Byte de control leído exitosamente',
+            registers: [
+                { name: 'Command Register', value: '0x20' },
+                { name: 'Data Register', value: '0x65' }
+            ]
+        },
+        0x60: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Listo para recibir el nuevo byte de control',
+            registers: [
+                { name: 'Command Register', value: '0x60' },
+                { name: 'Status Register', value: '0x02 (IBF=1)' }
+            ]
+        },
+        0xAA: { 
+            ack: '0xFA',
+            data: '0x55',
+            desc: 'Self-test completado exitosamente',
+            registers: [
+                { name: 'Command Register', value: '0xAA' },
+                { name: 'Data Register', value: '0x55 (Test OK)' }
+            ]
+        },
+        0xAB: { 
+            ack: '0xFA',
+            data: '0x00',
+            desc: 'Interface del teclado funcionando correctamente',
+            registers: [
+                { name: 'Command Register', value: '0xAB' },
+                { name: 'Data Register', value: '0x00 (No errors)' }
+            ]
+        },
+        0xAD: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Teclado deshabilitado',
+            registers: [
+                { name: 'Command Register', value: '0xAD' },
+                { name: 'Control Register', value: '0x00 (IRQ1 disabled)' }
+            ]
+        },
+        0xAE: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Teclado habilitado',
+            registers: [
+                { name: 'Command Register', value: '0xAE' },
+                { name: 'Control Register', value: '0x01 (IRQ1 enabled)' }
+            ]
+        },
+        0xED: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Listo para recibir byte de LEDs',
+            registers: [
+                { name: 'Command Register', value: '0xED' },
+                { name: 'Status Register', value: '0x02 (Waiting for data)' }
+            ]
+        },
+        0xF0: { 
+            ack: '0xFA',
+            data: '0xAB83',
+            desc: 'ID del teclado: MF2 con traducción',
+            registers: [
+                { name: 'Command Register', value: '0xF0' },
+                { name: 'Data Register', value: '0xAB' }
+            ]
+        },
+        0xFF: { 
+            ack: '0xFA',
+            data: '0xAA',
+            desc: 'Reset completado exitosamente',
+            registers: [
+                { name: 'Command Register', value: '0xFF' },
+                { name: 'Data Register', value: '0xAA (BAT Passed)' }
+            ]
+        }
+    };
+    
+    const response = responses[commandValue] || {
+        ack: '0xFE',
+        data: null,
+        desc: 'Comando no reconocido - Resend',
+        registers: []
+    };
+    
+    // Crear la entrada en el output
+    const entryDiv = document.createElement('div');
+    entryDiv.className = 'command-entry';
+    entryDiv.innerHTML = `
+        <div class="timestamp">⏱️ ${timestamp}</div>
+        <div class="command-sent">📤 Comando: ${command}</div>
+        <div class="command-description">${description}</div>
+        <div class="response">
+            <div class="response-label">📥 Respuesta del Controlador:</div>
+            <div class="response-data">ACK: ${response.ack}</div>
+            ${response.data ? `<div class="response-data">Data: ${response.data}</div>` : ''}
+            <div class="response-data">${response.desc}</div>
+            ${response.registers.length > 0 ? `
+                <div class="register-updates">
+                    <strong>Actualización de Registros:</strong>
+                    ${response.registers.map(reg => 
+                        `<div class="register-update">
+                            <span class="register-name">${reg.name}:</span> 
+                            <span class="register-value">${reg.value}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    // Remover el placeholder si existe
+    const placeholder = outputEl.querySelector('.output-placeholder');
+    if (placeholder) placeholder.remove();
+    
+    // Agregar la nueva entrada al principio
+    outputEl.insertBefore(entryDiv, outputEl.firstChild);
+    
+    // Limitar a 10 entradas
+    const entries = outputEl.querySelectorAll('.command-entry');
+    if (entries.length > 10) {
+        entries[entries.length - 1].remove();
+    }
+}
+
+// Simulador del Controlador de Mouse
+function initMouseSimulator() {
+    const commandSelect = document.getElementById('mouseCommand');
+    const sendButton = document.getElementById('sendMouseCommand');
+    const output = document.getElementById('mouseSimulatorOutput');
+    
+    if (!commandSelect || !sendButton || !output) return;
+    
+    sendButton.addEventListener('click', () => {
+        const command = commandSelect.value;
+        const option = commandSelect.options[commandSelect.selectedIndex];
+        const description = option.textContent;
+        
+        simulateMouseCommand(command, description, output);
+    });
+}
+
+function simulateMouseCommand(command, description, outputEl) {
+    const timestamp = new Date().toLocaleTimeString();
+    const commandValue = parseInt(command, 16);
+    
+    // Definir respuestas simuladas para cada comando
+    const responses = {
+        0xE6: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Scaling 1:1 configurado',
+            registers: [
+                { name: 'Command Register', value: '0xE6' },
+                { name: 'Mouse Config', value: 'Scaling 1:1' }
+            ]
+        },
+        0xE7: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Scaling 2:1 configurado',
+            registers: [
+                { name: 'Command Register', value: '0xE7' },
+                { name: 'Mouse Config', value: 'Scaling 2:1' }
+            ]
+        },
+        0xE8: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Listo para recibir valor de resolución',
+            registers: [
+                { name: 'Command Register', value: '0xE8' },
+                { name: 'Status Register', value: '0x02 (Waiting)' }
+            ]
+        },
+        0xE9: { 
+            ack: '0xFA',
+            data: '0x00 0x03 0x64',
+            desc: 'Estado: Botones=0, Resolución=3, Sample Rate=100',
+            registers: [
+                { name: 'Command Register', value: '0xE9' },
+                { name: 'Data Bytes', value: '3 bytes enviados' }
+            ]
+        },
+        0xF0: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Modo remoto activado',
+            registers: [
+                { name: 'Command Register', value: '0xF0' },
+                { name: 'Mouse Mode', value: 'Remote Mode' }
+            ]
+        },
+        0xF2: { 
+            ack: '0xFA',
+            data: '0x00',
+            desc: 'ID del dispositivo: Mouse estándar PS/2',
+            registers: [
+                { name: 'Command Register', value: '0xF2' },
+                { name: 'Device ID', value: '0x00 (Standard PS/2)' }
+            ]
+        },
+        0xF3: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Listo para recibir sample rate',
+            registers: [
+                { name: 'Command Register', value: '0xF3' },
+                { name: 'Status Register', value: '0x02 (Waiting)' }
+            ]
+        },
+        0xF4: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Data reporting habilitado',
+            registers: [
+                { name: 'Command Register', value: '0xF4' },
+                { name: 'Mouse Status', value: 'Enabled' }
+            ]
+        },
+        0xF5: { 
+            ack: '0xFA',
+            data: null,
+            desc: 'Data reporting deshabilitado',
+            registers: [
+                { name: 'Command Register', value: '0xF5' },
+                { name: 'Mouse Status', value: 'Disabled' }
+            ]
+        },
+        0xFF: { 
+            ack: '0xFA',
+            data: '0xAA 0x00',
+            desc: 'Reset completado: BAT OK, Device ID=0x00',
+            registers: [
+                { name: 'Command Register', value: '0xFF' },
+                { name: 'Data Register', value: '0xAA (BAT OK)' }
+            ]
+        }
+    };
+    
+    const response = responses[commandValue] || {
+        ack: '0xFE',
+        data: null,
+        desc: 'Comando no reconocido - Resend',
+        registers: []
+    };
+    
+    // Crear la entrada en el output
+    const entryDiv = document.createElement('div');
+    entryDiv.className = 'command-entry';
+    entryDiv.innerHTML = `
+        <div class="timestamp">⏱️ ${timestamp}</div>
+        <div class="command-sent">📤 Comando: ${command}</div>
+        <div class="command-description">${description}</div>
+        <div class="response">
+            <div class="response-label">📥 Respuesta del Mouse:</div>
+            <div class="response-data">ACK: ${response.ack}</div>
+            ${response.data ? `<div class="response-data">Data: ${response.data}</div>` : ''}
+            <div class="response-data">${response.desc}</div>
+            ${response.registers.length > 0 ? `
+                <div class="register-updates">
+                    <strong>Actualización de Registros:</strong>
+                    ${response.registers.map(reg => 
+                        `<div class="register-update">
+                            <span class="register-name">${reg.name}:</span> 
+                            <span class="register-value">${reg.value}</span>
+                        </div>`
+                    ).join('')}
+                </div>
+            ` : ''}
+        </div>
+    `;
+    
+    // Remover el placeholder si existe
+    const placeholder = outputEl.querySelector('.output-placeholder');
+    if (placeholder) placeholder.remove();
+    
+    // Agregar la nueva entrada al principio
+    outputEl.insertBefore(entryDiv, outputEl.firstChild);
+    
+    // Limitar a 10 entradas
+    const entries = outputEl.querySelectorAll('.command-entry');
+    if (entries.length > 10) {
+        entries[entries.length - 1].remove();
     }
 }
 

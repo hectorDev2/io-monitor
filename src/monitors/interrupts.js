@@ -82,76 +82,14 @@ class InterruptMonitor {
    * Obtiene interrupciones en macOS usando iostat y otras herramientas
    */
   async getMacInterrupts() {
-    return new Promise((resolve) => {
-      // En macOS no hay acceso directo a /proc/interrupts
-      // Usaremos datos simulados basados en actividad real del sistema
-      exec('vm_stat', (error, stdout) => {
-        const interrupts = [];
-        
-        // Simular IRQs comunes basados en la arquitectura de macOS
-        const commonIrqs = [
-          { irq: '1', device: 'i8042 (Keyboard)', type: 'keyboard' },
-          { irq: '12', device: 'PS/2 Mouse', type: 'mouse' },
-          { irq: '14', device: 'SATA Controller', type: 'disk' },
-          { irq: '16', device: 'USB Controller', type: 'usb' },
-          { irq: '19', device: 'Network Interface', type: 'network' },
-          { irq: '23', device: 'Graphics Controller', type: 'display' }
-        ];
-
-        commonIrqs.forEach(irqInfo => {
-          const count = Math.floor(Math.random() * 100000) + 50000;
-          const delta = Math.floor(Math.random() * 100);
-          
-          interrupts.push({
-            irq: irqInfo.irq,
-            count,
-            delta,
-            device: irqInfo.device,
-            type: irqInfo.type
-          });
-        });
-
-        resolve({ interrupts, platform: 'darwin', note: 'Simulated data - macOS restricts direct IRQ access' });
-      });
-    });
+    return { interrupts: [], error: 'macOS not supported. Use Linux for real interrupt monitoring.' };
   }
 
   /**
    * Obtiene interrupciones en Windows usando WMI
    */
   async getWindowsInterrupts() {
-    return new Promise((resolve) => {
-      exec('wmic path Win32_PerfFormattedData_PerfOS_System get ProcessorQueueLength,SystemCallsPersec /format:csv', 
-        (error, stdout) => {
-          const interrupts = [];
-          
-          // Windows no expone IRQs directamente como Linux
-          // Simulamos con datos del sistema
-          const commonIrqs = [
-            { irq: '1', device: 'Keyboard (i8042prt)', type: 'keyboard' },
-            { irq: '12', device: 'Mouse (i8042prt)', type: 'mouse' },
-            { irq: '14', device: 'IDE/SATA Controller', type: 'disk' },
-            { irq: '16', device: 'USB Host Controller', type: 'usb' },
-            { irq: '18', device: 'Network Adapter', type: 'network' },
-            { irq: '23', device: 'Display Adapter', type: 'display' }
-          ];
-
-          commonIrqs.forEach(irqInfo => {
-            const count = Math.floor(Math.random() * 100000) + 50000;
-            const delta = Math.floor(Math.random() * 100);
-            
-            interrupts.push({
-              irq: irqInfo.irq,
-              count,
-              delta,
-              device: irqInfo.device,
-              type: irqInfo.type
-            });
-          });
-
-          resolve({ interrupts, platform: 'win32', note: 'Simulated data - Windows restricts direct IRQ access' });
-      });
-    });
+    return { interrupts: [], error: 'Windows not supported. Use Linux for real interrupt monitoring.' };
   }
 
   /**

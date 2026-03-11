@@ -49,17 +49,9 @@
                         <span class="tab-icon">🖱️</span>
                         <span class="tab-label">Mouse</span>
                     </button>
-                    <button class="tab-button" data-tab="ide">
-                        <span class="tab-icon">💿</span>
-                        <span class="tab-label">IDE/ATA</span>
-                    </button>
-                    <button class="tab-button" data-tab="sata">
-                        <span class="tab-icon">💽</span>
-                        <span class="tab-label">SATA</span>
-                    </button>
-                    <button class="tab-button" data-tab="nvme">
-                        <span class="tab-icon">⚡</span>
-                        <span class="tab-label">NVMe</span>
+                    <button class="tab-button" data-tab="dma">
+                        <span class="tab-icon">🔄</span>
+                        <span class="tab-label">DMA</span>
                     </button>
                     <button class="tab-button" data-tab="interrupts">
                         <span class="tab-icon">⚡</span>
@@ -84,6 +76,33 @@
                         <span class="info-badge" id="keyboardStatus">Esperando...</span>
                     </div>
                 </div>
+
+                <!-- Explicación del Controlador de Teclado -->
+                <section class="panel info-panel">
+                    <h2>
+                        <span class="icon">💡</span>
+                        ¿Cómo funciona el Controlador de Teclado?
+                        <span class="subtitle">Aprende sobre el i8042</span>
+                    </h2>
+                    <div class="explanation-box">
+                        <p><strong>El controlador i8042 es el chip que gestiona el teclado y el mouse en la computadora.</strong></p>
+                        <ul class="info-list">
+                            <li>⌨️ <strong>Scan Codes:</strong> Cada tecla genera un código único (scan code) cuando la presionas</li>
+                            <li>📍 <strong>Puertos E/S:</strong> Usa el puerto 0x60 para datos y 0x64 para comandos/estado</li>
+                            <li>⚡ <strong>IRQ 1:</strong> Genera una interrupción cada vez que presionas una tecla</li>
+                            <li>🔄 <strong>Buffer:</strong> Almacena hasta 16 bytes de datos de teclas presionadas</li>
+                        </ul>
+                        <div class="example-box">
+                            <strong>Ejemplo:</strong> Cuando presionas la tecla 'A':
+                            <ol>
+                                <li>El teclado envía el scan code 0x1E al puerto 0x60</li>
+                                <li>El controlador activa IRQ 1 para avisar a la CPU</li>
+                                <li>La CPU lee el código desde el puerto 0x60</li>
+                                <li>El sistema operativo convierte 0x1E en la letra 'A'</li>
+                            </ol>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- Buffer de Texto del Teclado -->
                 <section class="panel text-buffer-panel">
@@ -176,6 +195,41 @@
                     </div>
                 </section>
 
+                <!-- Simulador de Escritura al Controlador -->
+                <section class="panel simulator-panel">
+                    <h2>
+                        <span class="icon">🎮</span>
+                        Simulador de Comandos al Controlador
+                        <span class="subtitle">Envía comandos al i8042</span>
+                    </h2>
+                    <div class="explanation-box">
+                        <p><strong>Simula la escritura de comandos al controlador de teclado i8042.</strong></p>
+                        <p>El controlador acepta varios comandos a través del puerto 0x64. Observa cómo responde el hardware.</p>
+                    </div>
+                    <div class="simulator-controls">
+                        <div class="command-selector">
+                            <label for="keyboardCommand">Selecciona un comando:</label>
+                            <select id="keyboardCommand">
+                                <option value="0x20">0x20 - Leer Byte de Control</option>
+                                <option value="0x60">0x60 - Escribir Byte de Control</option>
+                                <option value="0xAA">0xAA - Test del Controlador (Self-Test)</option>
+                                <option value="0xAB">0xAB - Test de Interface del Teclado</option>
+                                <option value="0xAD">0xAD - Deshabilitar Teclado</option>
+                                <option value="0xAE">0xAE - Habilitar Teclado</option>
+                                <option value="0xED">0xED - Set LEDs (Num/Caps/Scroll Lock)</option>
+                                <option value="0xF0">0xF0 - Leer ID del Teclado</option>
+                                <option value="0xFF">0xFF - Reset del Teclado</option>
+                            </select>
+                        </div>
+                        <button id="sendKeyboardCommand" class="simulator-button">
+                            📤 Enviar Comando
+                        </button>
+                    </div>
+                    <div class="simulator-output" id="keyboardSimulatorOutput">
+                        <div class="output-placeholder">Selecciona y envía un comando para ver la respuesta del controlador...</div>
+                    </div>
+                </section>
+
                 <!-- Eventos del Teclado -->
                 <section class="panel highlight-panel keyboard-events-panel">
                     <h2>
@@ -228,6 +282,33 @@
                         <span class="info-badge" id="mouseStatus">Esperando...</span>
                     </div>
                 </div>
+
+                <!-- Explicación del Controlador de Mouse -->
+                <section class="panel info-panel">
+                    <h2>
+                        <span class="icon">💡</span>
+                        ¿Cómo funciona el Controlador de Mouse?
+                        <span class="subtitle">Protocolo PS/2</span>
+                    </h2>
+                    <div class="explanation-box">
+                        <p><strong>El mouse PS/2 envía paquetes de 3-4 bytes cada vez que lo mueves o haces clic.</strong></p>
+                        <ul class="info-list">
+                            <li>📦 <strong>Paquetes de datos:</strong> Cada movimiento genera 3 bytes (estado, X, Y)</li>
+                            <li>🖱️ <strong>Movimiento relativo:</strong> Reporta cuánto se movió, no la posición absoluta</li>
+                            <li>⚡ <strong>IRQ 12:</strong> Genera una interrupción cuando hay datos disponibles</li>
+                            <li>🔢 <strong>Resolución:</strong> Típicamente 200-800 DPI (puntos por pulgada)</li>
+                        </ul>
+                        <div class="example-box">
+                            <strong>Paquete de datos del mouse:</strong>
+                            <ul>
+                                <li><strong>Byte 1:</strong> Estado de botones (bits para izquierdo, derecho, medio)</li>
+                                <li><strong>Byte 2:</strong> Movimiento en eje X (-127 a +127)</li>
+                                <li><strong>Byte 3:</strong> Movimiento en eje Y (-127 a +127)</li>
+                                <li><strong>Byte 4:</strong> Scroll wheel (si está presente)</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
 
                 <!-- Información del Mouse -->
                 <section class="panel mouse-info-panel">
@@ -328,6 +409,42 @@
                     </div>
                 </section>
 
+                <!-- Simulador de Escritura al Controlador -->
+                <section class="panel simulator-panel">
+                    <h2>
+                        <span class="icon">🎮</span>
+                        Simulador de Comandos al Controlador
+                        <span class="subtitle">Envía comandos al mouse PS/2</span>
+                    </h2>
+                    <div class="explanation-box">
+                        <p><strong>Simula la escritura de comandos al mouse PS/2.</strong></p>
+                        <p>El mouse acepta varios comandos a través del controlador i8042. Observa cómo responde el dispositivo.</p>
+                    </div>
+                    <div class="simulator-controls">
+                        <div class="command-selector">
+                            <label for="mouseCommand">Selecciona un comando:</label>
+                            <select id="mouseCommand">
+                                <option value="0xE6">0xE6 - Set Scaling 1:1</option>
+                                <option value="0xE7">0xE7 - Set Scaling 2:1</option>
+                                <option value="0xE8">0xE8 - Set Resolution</option>
+                                <option value="0xE9">0xE9 - Leer Estado del Mouse</option>
+                                <option value="0xF0">0xF0 - Set Remote Mode</option>
+                                <option value="0xF2">0xF2 - Leer ID del Dispositivo</option>
+                                <option value="0xF3">0xF3 - Set Sample Rate</option>
+                                <option value="0xF4">0xF4 - Habilitar Data Reporting</option>
+                                <option value="0xF5">0xF5 - Deshabilitar Data Reporting</option>
+                                <option value="0xFF">0xFF - Reset del Mouse</option>
+                            </select>
+                        </div>
+                        <button id="sendMouseCommand" class="simulator-button">
+                            📤 Enviar Comando
+                        </button>
+                    </div>
+                    <div class="simulator-output" id="mouseSimulatorOutput">
+                        <div class="output-placeholder">Selecciona y envía un comando para ver la respuesta del controlador...</div>
+                    </div>
+                </section>
+
                 <!-- Eventos del Mouse -->
                 <section class="panel highlight-panel mouse-events-panel">
                     <h2>
@@ -365,359 +482,382 @@
                     <!-- Fin Pestaña Mouse -->
 
                     <!-- ============================================
+                         PESTAÑA: DMA (Direct Memory Access)
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-dma">
+                        <div class="controller-section dma-section">
+                            <div class="controller-header">
+                                <h1 class="controller-title">
+                                    <span class="icon">🔄</span>
+                                    CONTROLADOR DMA (Direct Memory Access)
+                                </h1>
+                                <div class="controller-info">
+                                    <span class="info-badge">Canales: 8</span>
+                                    <span class="info-badge">DMA1: 0x00-0x0F</span>
+                                    <span class="info-badge">DMA2: 0xC0-0xDF</span>
+                                    <span class="info-badge" id="dmaStatus">Activo</span>
+                                </div>
+                            </div>
+
+                            <!-- Explicación DMA -->
+                            <section class="panel info-panel">
+                                <h2>
+                                    <span class="icon">💡</span>
+                                    ¿Qué es DMA?
+                                    <span class="subtitle">Acceso Directo a Memoria</span>
+                                </h2>
+                                <div class="explanation-box">
+                                    <p><strong>DMA permite que los dispositivos transfieran datos directamente a la memoria sin usar la CPU.</strong></p>
+                                    <ul class="info-list">
+                                        <li>📦 <strong>Sin CPU:</strong> Las transferencias ocurren sin intervención del procesador</li>
+                                        <li>⚡ <strong>Más rápido:</strong> Libera a la CPU para otras tareas mientras se transfieren datos</li>
+                                        <li>🔢 <strong>8 Canales:</strong> Cada dispositivo puede usar un canal DMA exclusivo</li>
+                                        <li>💾 <strong>Memoria directa:</strong> Los datos van directamente del dispositivo a la RAM</li>
+                                    </ul>
+                                    <div class="example-box">
+                                        <strong>Ejemplo:</strong> Cuando lees un archivo del disco, el controlador DMA transfiere los datos 
+                                        directamente del disco a la memoria RAM sin que la CPU tenga que copiar cada byte.
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Canales DMA -->
+                            <section class="panel dma-channels-panel">
+                                <h2>
+                                    <span class="icon">🎛️</span>
+                                    Canales DMA
+                                    <span class="subtitle">Estado de cada canal</span>
+                                </h2>
+                                <div class="channels-grid">
+                                    <!-- Canal 0 -->
+                                    <div class="channel-card" id="dma-channel-0">
+                                        <div class="channel-header">
+                                            <span class="channel-number">Canal 0</span>
+                                            <span class="channel-status inactive">Libre</span>
+                                        </div>
+                                        <div class="channel-info">
+                                            <div class="info-row">
+                                                <span class="label">Dispositivo:</span>
+                                                <span class="value">-</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Transferencias:</span>
+                                                <span class="value" id="dma0-transfers">0</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Bytes:</span>
+                                                <span class="value" id="dma0-bytes">0 B</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Canal 1 -->
+                                    <div class="channel-card" id="dma-channel-1">
+                                        <div class="channel-header">
+                                            <span class="channel-number">Canal 1</span>
+                                            <span class="channel-status inactive">Libre</span>
+                                        </div>
+                                        <div class="channel-info">
+                                            <div class="info-row">
+                                                <span class="label">Dispositivo:</span>
+                                                <span class="value">-</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Transferencias:</span>
+                                                <span class="value" id="dma1-transfers">0</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Bytes:</span>
+                                                <span class="value" id="dma1-bytes">0 B</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Canal 2 -->
+                                    <div class="channel-card active" id="dma-channel-2">
+                                        <div class="channel-header">
+                                            <span class="channel-number">Canal 2</span>
+                                            <span class="channel-status active">Floppy Disk</span>
+                                        </div>
+                                        <div class="channel-info">
+                                            <div class="info-row">
+                                                <span class="label">Dispositivo:</span>
+                                                <span class="value">Floppy Controller</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Transferencias:</span>
+                                                <span class="value" id="dma2-transfers">152</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Bytes:</span>
+                                                <span class="value" id="dma2-bytes">78 KB</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Canal 3 -->
+                                    <div class="channel-card" id="dma-channel-3">
+                                        <div class="channel-header">
+                                            <span class="channel-number">Canal 3</span>
+                                            <span class="channel-status inactive">Libre</span>
+                                        </div>
+                                        <div class="channel-info">
+                                            <div class="info-row">
+                                                <span class="label">Dispositivo:</span>
+                                                <span class="value">-</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Transferencias:</span>
+                                                <span class="value" id="dma3-transfers">0</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Bytes:</span>
+                                                <span class="value" id="dma3-bytes">0 B</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Canal 4 -->
+                                    <div class="channel-card cascade" id="dma-channel-4">
+                                        <div class="channel-header">
+                                            <span class="channel-number">Canal 4</span>
+                                            <span class="channel-status cascade">Cascada</span>
+                                        </div>
+                                        <div class="channel-info">
+                                            <div class="info-row">
+                                                <span class="label">Dispositivo:</span>
+                                                <span class="value">DMA Cascade</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Función:</span>
+                                                <span class="value">Conecta DMA1 con DMA2</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Canal 5 -->
+                                    <div class="channel-card active" id="dma-channel-5">
+                                        <div class="channel-header">
+                                            <span class="channel-number">Canal 5</span>
+                                            <span class="channel-status active">Sound Card</span>
+                                        </div>
+                                        <div class="channel-info">
+                                            <div class="info-row">
+                                                <span class="label">Dispositivo:</span>
+                                                <span class="value">Sound Blaster</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Transferencias:</span>
+                                                <span class="value" id="dma5-transfers">3847</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Bytes:</span>
+                                                <span class="value" id="dma5-bytes">1.5 MB</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Canal 6 -->
+                                    <div class="channel-card" id="dma-channel-6">
+                                        <div class="channel-header">
+                                            <span class="channel-number">Canal 6</span>
+                                            <span class="channel-status inactive">Libre</span>
+                                        </div>
+                                        <div class="channel-info">
+                                            <div class="info-row">
+                                                <span class="label">Dispositivo:</span>
+                                                <span class="value">-</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Transferencias:</span>
+                                                <span class="value" id="dma6-transfers">0</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Bytes:</span>
+                                                <span class="value" id="dma6-bytes">0 B</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Canal 7 -->
+                                    <div class="channel-card" id="dma-channel-7">
+                                        <div class="channel-header">
+                                            <span class="channel-number">Canal 7</span>
+                                            <span class="channel-status inactive">Libre</span>
+                                        </div>
+                                        <div class="channel-info">
+                                            <div class="info-row">
+                                                <span class="label">Dispositivo:</span>
+                                                <span class="value">-</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Transferencias:</span>
+                                                <span class="value" id="dma7-transfers">0</span>
+                                            </div>
+                                            <div class="info-row">
+                                                <span class="label">Bytes:</span>
+                                                <span class="value" id="dma7-bytes">0 B</span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Registros DMA -->
+                            <section class="panel registers-panel dma-registers">
+                                <h2>
+                                    <span class="icon">🔧</span>
+                                    Registros del Controlador DMA
+                                    <span class="subtitle">Registros principales</span>
+                                </h2>
+                                <div class="explanation-box">
+                                    <p><strong>Los registros DMA controlan cómo se transfieren los datos.</strong> Cada canal tiene sus propios registros para dirección de memoria, contador de bytes, y modo de operación.</p>
+                                </div>
+                                <div class="registers-grid">
+                                    <!-- Address Register -->
+                                    <div class="register-box data-register" id="dmaAddressRegister">
+                                        <div class="register-header">
+                                            <h3>Address Register</h3>
+                                            <span class="register-port">Canal 2: 0x04</span>
+                                        </div>
+                                        <div class="register-value">0x1A40</div>
+                                        <div class="register-binary">0001 1010 0100 0000</div>
+                                        <div class="register-description">Dirección de memoria para la transferencia</div>
+                                        <div class="register-activity"></div>
+                                    </div>
+
+                                    <!-- Count Register -->
+                                    <div class="register-box status-register" id="dmaCountRegister">
+                                        <div class="register-header">
+                                            <h3>Count Register</h3>
+                                            <span class="register-port">Canal 2: 0x05</span>
+                                        </div>
+                                        <div class="register-value">0x0200</div>
+                                        <div class="register-binary">0000 0010 0000 0000</div>
+                                        <div class="register-description">Número de bytes a transferir (512)</div>
+                                        <div class="register-activity"></div>
+                                    </div>
+
+                                    <!-- Mode Register -->
+                                    <div class="register-box command-register" id="dmaModeRegister">
+                                        <div class="register-header">
+                                            <h3>Mode Register</h3>
+                                            <span class="register-port">DMA1: 0x0B</span>
+                                        </div>
+                                        <div class="register-value">0x46</div>
+                                        <div class="register-binary">0100 0110</div>
+                                        <div class="register-flags">
+                                            <div class="flag flag-active">
+                                                <span class="flag-name">READ</span>
+                                                <span class="flag-desc">Lectura de memoria</span>
+                                            </div>
+                                            <div class="flag flag-active">
+                                                <span class="flag-name">SINGLE</span>
+                                                <span class="flag-desc">Modo single</span>
+                                            </div>
+                                        </div>
+                                        <div class="register-activity"></div>
+                                    </div>
+
+                                    <!-- Status Register -->
+                                    <div class="register-box control-register" id="dmaStatusRegister">
+                                        <div class="register-header">
+                                            <h3>Status Register</h3>
+                                            <span class="register-port">DMA1: 0x08</span>
+                                        </div>
+                                        <div class="register-value">0x04</div>
+                                        <div class="register-binary">0000 0100</div>
+                                        <div class="register-flags">
+                                            <div class="flag flag-active">
+                                                <span class="flag-name">TC2</span>
+                                                <span class="flag-desc">Canal 2 completó transferencia</span>
+                                            </div>
+                                        </div>
+                                        <div class="register-activity"></div>
+                                    </div>
+                                </div>
+                            </section>
+
+                            <!-- Transferencias en tiempo real -->
+                            <section class="panel highlight-panel dma-transfers-panel">
+                                <h2>
+                                    <span class="icon">⚡</span>
+                                    Transferencias DMA en Tiempo Real
+                                    <span class="subtitle">Operaciones activas</span>
+                                </h2>
+                                <div class="explanation-box">
+                                    <p><strong>Aquí puedes ver las transferencias DMA conforme ocurren.</strong> Cada transferencia muestra qué canal se usó, cuántos bytes se movieron y a qué dirección de memoria.</p>
+                                </div>
+                                <div class="table-container">
+                                    <table id="dmaTransfersTable">
+                                        <thead>
+                                            <tr>
+                                                <th>Tiempo</th>
+                                                <th>Canal</th>
+                                                <th>Dispositivo</th>
+                                                <th>Dirección</th>
+                                                <th>Bytes</th>
+                                                <th>Modo</th>
+                                                <th>Estado</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody id="dmaTransfersBody">
+                                            <tr>
+                                                <td colspan="7" class="loading">🔄 Esperando transferencias DMA...</td>
+                                            </tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </section>
+                        </div>
+                    </div>
+                    <!-- Fin Pestaña DMA -->
+
+
+                    <!-- ============================================
                          PESTAÑA: IDE/ATA
                          ============================================ -->
-                    <div class="tab-pane" id="tab-ide">
-                        <!-- Controlador IDE/ATA (Primary & Secondary) -->
-            <div class="controller-section ide-section">
-                <div class="controller-header">
-                    <div class="controller-title">
-                        <span class="icon">💿</span>
-                        <h2>Controlador IDE/ATA</h2>
-                    </div>
-                    <div class="controller-badges">
-                        <span class="info-badge">
-                            <strong>Puerto:</strong> 0x1F0-0x1F7 (Primary)
-                        </span>
-                        <span class="info-badge">
-                            <strong>IRQ:</strong> IRQ14/15
-                        </span>
-                        <span class="info-badge ide-status">
-                            <strong>Estado:</strong> <span id="ideStatus">Activo</span>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Estadísticas IDE -->
-                <div class="disk-stats-container">
-                    <div class="stat-card">
-                        <div class="stat-label">📖 Lecturas</div>
-                        <div class="stat-value" id="ideReads">0</div>
-                        <div class="stat-detail">operaciones completadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📝 Escrituras</div>
-                        <div class="stat-value" id="ideWrites">0</div>
-                        <div class="stat-detail">operaciones completadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📥 Bytes Leídos</div>
-                        <div class="stat-value" id="ideReadBytes">0 B</div>
-                        <div class="stat-detail">desde el inicio</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📤 Bytes Escritos</div>
-                        <div class="stat-value" id="ideWriteBytes">0 B</div>
-                        <div class="stat-detail">desde el inicio</div>
-                    </div>
-                </div>
-
-                <!-- Registros IDE -->
-                <div class="registers-grid">
-                    <!-- Data Register -->
-                    <div class="register-box" id="ideDataRegister">
-                        <div class="register-header">
-                            <span class="register-title">Data Register</span>
-                            <span class="register-port">Puerto 0x1F0</span>
-                        </div>
-                        <div class="register-value">0x00</div>
-                        <div class="register-binary">00000000</div>
-                        <div class="register-description">Lectura/Escritura de datos del sector</div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- Status Register -->
-                    <div class="register-box" id="ideStatusRegister">
-                        <div class="register-header">
-                            <span class="register-title">Status Register</span>
-                            <span class="register-port">Puerto 0x1F7</span>
-                        </div>
-                        <div class="register-value">0x50</div>
-                        <div class="register-binary">01010000</div>
-                        <div class="register-description">Estado del controlador IDE</div>
-                        <div class="register-flags">
-                            <span class="flag" id="ide-flag-busy">BUSY</span>
-                            <span class="flag" id="ide-flag-drdy">DRDY</span>
-                            <span class="flag" id="ide-flag-err">ERR</span>
-                        </div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- Command Register -->
-                    <div class="register-box" id="ideCommandRegister">
-                        <div class="register-header">
-                            <span class="register-title">Command Register</span>
-                            <span class="register-port">Puerto 0x1F7</span>
-                        </div>
-                        <div class="register-value">0x00</div>
-                        <div class="register-binary">00000000</div>
-                        <div class="register-description">Último comando enviado</div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- LBA Register -->
-                    <div class="register-box" id="ideLBARegister">
-                        <div class="register-header">
-                            <span class="register-title">LBA Register</span>
-                            <span class="register-port">Puerto 0x1F3-0x1F6</span>
-                        </div>
-                        <div class="register-value">0x00000000</div>
-                        <div class="register-binary">00000000 00000000</div>
-                        <div class="register-description">Dirección del sector (LBA)</div>
-                        <div class="register-activity"></div>
-                    </div>
-                </div>
-
-                <!-- Dispositivos IDE detectados -->
-                <div class="device-list">
-                    <h3>Dispositivos Detectados</h3>
-                    <div id="ideDevices" class="device-chips">
-                        <span class="device-chip">sda: 500 GB</span>
-                        </div>
-                    </div>
-                </div>
-                    </div>
-                    <!-- Fin Pestaña IDE -->
 
                     <!-- ============================================
                          PESTAÑA: SATA
                          ============================================ -->
-                    <div class="tab-pane" id="tab-sata">
-                        <!-- Controlador SATA (AHCI) -->
-            <div class="controller-section sata-section">
-                <div class="controller-header">
-                    <div class="controller-title">
-                        <span class="icon">💽</span>
-                        <h2>Controlador SATA (AHCI)</h2>
-                    </div>
-                    <div class="controller-badges">
-                        <span class="info-badge">
-                            <strong>Interfaz:</strong> AHCI
-                        </span>
-                        <span class="info-badge">
-                            <strong>IRQ:</strong> MSI/MSI-X
-                        </span>
-                        <span class="info-badge sata-status">
-                            <strong>Estado:</strong> <span id="sataStatus">Activo</span>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Estadísticas SATA -->
-                <div class="disk-stats-container">
-                    <div class="stat-card">
-                        <div class="stat-label">📖 Lecturas</div>
-                        <div class="stat-value" id="sataReads">0</div>
-                        <div class="stat-detail">operaciones completadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📝 Escrituras</div>
-                        <div class="stat-value" id="sataWrites">0</div>
-                        <div class="stat-detail">operaciones completadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📥 Bytes Leídos</div>
-                        <div class="stat-value" id="sataReadBytes">0 B</div>
-                        <div class="stat-detail">desde el inicio</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📤 Bytes Escritos</div>
-                        <div class="stat-value" id="sataWriteBytes">0 B</div>
-                        <div class="stat-detail">desde el inicio</div>
-                    </div>
-                </div>
-
-                <!-- Registros SATA/AHCI -->
-                <div class="registers-grid">
-                    <!-- Command List Base Address -->
-                    <div class="register-box" id="sataCommandListRegister">
-                        <div class="register-header">
-                            <span class="register-title">Command List Base</span>
-                            <span class="register-port">MMIO Offset 0x00</span>
-                        </div>
-                        <div class="register-value">0x00000000</div>
-                        <div class="register-binary">00000000 00000000</div>
-                        <div class="register-description">Base de lista de comandos AHCI</div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- Port Status -->
-                    <div class="register-box" id="sataPortStatusRegister">
-                        <div class="register-header">
-                            <span class="register-title">Port Status</span>
-                            <span class="register-port">MMIO PxSSTSS</span>
-                        </div>
-                        <div class="register-value">0x113</div>
-                        <div class="register-binary">00010011</div>
-                        <div class="register-description">Estado del puerto SATA</div>
-                        <div class="register-flags">
-                            <span class="flag flag-active" id="sata-flag-det">DET=3</span>
-                            <span class="flag flag-active" id="sata-flag-spd">SPD=1</span>
-                        </div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- Command Register -->
-                    <div class="register-box" id="sataCommandRegister">
-                        <div class="register-header">
-                            <span class="register-title">Command Register</span>
-                            <span class="register-port">MMIO PxCMD</span>
-                        </div>
-                        <div class="register-value">0x0017</div>
-                        <div class="register-binary">00010111</div>
-                        <div class="register-description">Control de puerto SATA</div>
-                        <div class="register-flags">
-                            <span class="flag" id="sata-flag-st">ST</span>
-                            <span class="flag" id="sata-flag-fre">FRE</span>
-                        </div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- Task File Data -->
-                    <div class="register-box" id="sataTFDataRegister">
-                        <div class="register-header">
-                            <span class="register-title">Task File Data</span>
-                            <span class="register-port">MMIO PxTFD</span>
-                        </div>
-                        <div class="register-value">0x50</div>
-                        <div class="register-binary">01010000</div>
-                        <div class="register-description">Estado del Task File</div>
-                        <div class="register-activity"></div>
-                    </div>
-                </div>
-
-                <!-- Dispositivos SATA detectados -->
-                <div class="device-list">
-                    <h3>Dispositivos Detectados</h3>
-                    <div id="sataDevices" class="device-chips">
-                        <span class="device-chip">sda: 1 TB SSD</span>
-                        </div>
-                    </div>
-                </div>
-                    </div>
-                    <!-- Fin Pestaña SATA -->
 
                     <!-- ============================================
                          PESTAÑA: NVMe
                          ============================================ -->
-                    <div class="tab-pane" id="tab-nvme">
-                        <!-- Controlador NVMe -->
-                        <div class="controller-section nvme-section">
-                <div class="controller-header">
-                    <div class="controller-title">
-                        <span class="icon">⚡</span>
-                        <h2>Controlador NVMe</h2>
-                    </div>
-                    <div class="controller-badges">
-                        <span class="info-badge">
-                            <strong>Interfaz:</strong> PCIe Gen3/4 x4
-                        </span>
-                        <span class="info-badge">
-                            <strong>IRQ:</strong> MSI-X
-                        </span>
-                        <span class="info-badge nvme-status">
-                            <strong>Estado:</strong> <span id="nvmeStatus">Activo</span>
-                        </span>
-                    </div>
-                </div>
-
-                <!-- Estadísticas NVMe -->
-                <div class="disk-stats-container">
-                    <div class="stat-card">
-                        <div class="stat-label">📖 Lecturas</div>
-                        <div class="stat-value" id="nvmeReads">0</div>
-                        <div class="stat-detail">operaciones completadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📝 Escrituras</div>
-                        <div class="stat-value" id="nvmeWrites">0</div>
-                        <div class="stat-detail">operaciones completadas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📥 Bytes Leídos</div>
-                        <div class="stat-value" id="nvmeReadBytes">0 B</div>
-                        <div class="stat-detail">desde el inicio</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">📤 Bytes Escritos</div>
-                        <div class="stat-value" id="nvmeWriteBytes">0 B</div>
-                        <div class="stat-detail">desde el inicio</div>
-                    </div>
-                </div>
-
-                <!-- Registros NVMe -->
-                <div class="registers-grid">
-                    <!-- Admin Queue Base -->
-                    <div class="register-box" id="nvmeAdminQueueRegister">
-                        <div class="register-header">
-                            <span class="register-title">Admin Queue Base</span>
-                            <span class="register-port">BAR0 + 0x28</span>
-                        </div>
-                        <div class="register-value">0x00000000</div>
-                        <div class="register-binary">00000000 00000000</div>
-                        <div class="register-description">Base de cola de administración</div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- Controller Status -->
-                    <div class="register-box" id="nvmeStatusRegister">
-                        <div class="register-header">
-                            <span class="register-title">Controller Status</span>
-                            <span class="register-port">BAR0 + 0x1C (CSTS)</span>
-                        </div>
-                        <div class="register-value">0x01</div>
-                        <div class="register-binary">00000001</div>
-                        <div class="register-description">Estado del controlador NVMe</div>
-                        <div class="register-flags">
-                            <span class="flag flag-active" id="nvme-flag-rdy">RDY</span>
-                            <span class="flag" id="nvme-flag-cfs">CFS</span>
-                        </div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- Controller Config -->
-                    <div class="register-box" id="nvmeConfigRegister">
-                        <div class="register-header">
-                            <span class="register-title">Controller Config</span>
-                            <span class="register-port">BAR0 + 0x14 (CC)</span>
-                        </div>
-                        <div class="register-value">0x460001</div>
-                        <div class="register-binary">01000110 00000001</div>
-                        <div class="register-description">Configuración del controlador</div>
-                        <div class="register-flags">
-                            <span class="flag flag-active" id="nvme-flag-en">EN</span>
-                        </div>
-                        <div class="register-activity"></div>
-                    </div>
-
-                    <!-- Doorbell Register -->
-                    <div class="register-box" id="nvmeDoorbellRegister">
-                        <div class="register-header">
-                            <span class="register-title">Doorbell</span>
-                            <span class="register-port">BAR0 + 0x1000+</span>
-                        </div>
-                        <div class="register-value">0x0000</div>
-                        <div class="register-binary">00000000</div>
-                        <div class="register-description">Notificación de comandos</div>
-                        <div class="register-activity"></div>
-                    </div>
-                </div>
-
-                <!-- Dispositivos NVMe detectados -->
-                <div class="device-list">
-                    <h3>Dispositivos Detectados</h3>
-                    <div id="nvmeDevices" class="device-chips">
-                        <span class="device-chip">nvme0n1: 512 GB NVMe SSD</span>
-                         </div>
-                    </div>
-                </div>
-                    </div>
-                    <!-- Fin Pestaña NVMe -->
 
                     <!-- ============================================
                          PESTAÑA: INTERRUPCIONES
                          ============================================ -->
                     <div class="tab-pane" id="tab-interrupts">
+                        <!-- Explicación de Interrupciones -->
+                        <section class="panel info-panel">
+                            <h2>
+                                <span class="icon">💡</span>
+                                ¿Qué son las Interrupciones (IRQs)?
+                                <span class="subtitle">Señales de los dispositivos</span>
+                            </h2>
+                            <div class="explanation-box">
+                                <p><strong>Las interrupciones son señales que los dispositivos envían a la CPU para avisar que necesitan atención.</strong></p>
+                                <ul class="info-list">
+                                    <li>⚡ <strong>Señal urgente:</strong> El dispositivo interrumpe lo que la CPU está haciendo</li>
+                                    <li>🔢 <strong>IRQ Number:</strong> Cada dispositivo tiene un número de IRQ único (0-15 en PC)</li>
+                                    <li>⏱️ <strong>Respuesta rápida:</strong> La CPU detiene su tarea actual y atiende la interrupción</li>
+                                    <li>🔄 <strong>Rutina de servicio:</strong> Se ejecuta código específico para manejar el dispositivo</li>
+                                </ul>
+                                <div class="example-box">
+                                    <strong>Ejemplo de IRQs comunes:</strong>
+                                    <ul>
+                                        <li><strong>IRQ 0:</strong> Temporizador del sistema (ticks cada 1ms)</li>
+                                        <li><strong>IRQ 1:</strong> Teclado (cada vez que presionas una tecla)</li>
+                                        <li><strong>IRQ 12:</strong> Mouse PS/2 (cada movimiento o clic)</li>
+                                        <li><strong>IRQ 14/15:</strong> Controladores de disco (IDE)</li>
+                                    </ul>
+                                    <p style="margin-top: 15px;"><strong>¿Por qué son importantes?</strong> Sin interrupciones, la CPU tendría que estar constantemente verificando cada dispositivo para ver si tiene datos, desperdiciando mucho tiempo.</p>
+                                </div>
+                            </div>
+                        </section>
+
                         <!-- Sección de Interrupciones -->
                         <section class="panel">
                 <h2>

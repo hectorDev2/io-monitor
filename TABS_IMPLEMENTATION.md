@@ -2,41 +2,42 @@
 
 ## Resumen
 
-Se ha implementado un sistema de pestañas para separar cada controlador en su propia vista, mejorando la organización y navegación de la interfaz.
+Se ha implementado un sistema de pestañas para separar cada controlador en su propia vista, mejorando la organización y navegación de la interfaz. El sistema incluye simuladores interactivos para enviar comandos a los controladores.
 
 ## Estructura
 
 ### Pestañas Disponibles
 
 1. **⌨️ Teclado** (`tab-keyboard`) - Controlador de Teclado i8042
-   - Buffer de texto
+   - Explicación del controlador i8042
+   - Buffer de texto interactivo
    - Registros del controlador
+   - **Simulador de comandos** - Envía comandos al controlador
    - Eventos en tiempo real
 
 2. **🖱️ Mouse** (`tab-mouse`) - Controlador de Mouse PS/2
+   - Explicación del protocolo PS/2
    - Estado del mouse
    - Registros del controlador
+   - **Simulador de comandos** - Envía comandos al mouse
    - Eventos en tiempo real
 
-3. **💿 IDE/ATA** (`tab-ide`) - Controlador IDE/ATA
-   - Estadísticas de lectura/escritura
-   - Registros del controlador
-   - Dispositivos detectados
+3. **🔄 DMA** (`tab-dma`) - Controlador DMA (Direct Memory Access)
+   - Explicación de DMA
+   - 8 canales DMA (0-7) con estado
+   - Registros DMA
+   - Tabla de transferencias en tiempo real
 
-4. **💽 SATA** (`tab-sata`) - Controlador SATA (AHCI)
-   - Estadísticas de lectura/escritura
-   - Registros del controlador
-   - Dispositivos detectados
-
-5. **⚡ NVMe** (`tab-nvme`) - Controlador NVMe
-   - Estadísticas de lectura/escritura
-   - Registros del controlador
-   - Dispositivos detectados
-
-6. **⚡ Interrupciones** (`tab-interrupts`) - Sistema de Interrupciones
-   - Tabla de IRQs
+4. **⚡ Interrupciones** (`tab-interrupts`) - Sistema de Interrupciones
+   - Explicación de IRQs
+   - Tabla de interrupciones
    - Puertos de E/S
    - Visualización de registros
+
+### Pestañas Eliminadas (no funcionan en macOS)
+- ~~💿 IDE/ATA~~ - Eliminado (no disponible en macOS)
+- ~~💽 SATA~~ - Eliminado (no disponible en macOS)
+- ~~⚡ NVMe~~ - Eliminado (no disponible en macOS)
 
 ## Archivos Modificados
 
@@ -50,11 +51,21 @@ Se ha implementado un sistema de pestañas para separar cada controlador en su p
 - Estilos específicos para cada pestaña con colores distintivos
 - Animación `fadeIn` para transiciones suaves
 - Responsive design para dispositivos móviles
+- **Nuevos estilos para simuladores**: `.simulator-panel`, `.simulator-controls`, `.simulator-button`, `.simulator-output`
+- Estilos para entradas de comandos y respuestas simuladas
 
 ### 3. `public/app.js`
 - Función `initTabs()` para inicializar event listeners
 - Función `switchTab(tabId)` para cambiar entre pestañas
 - Redimensionamiento automático del canvas al cambiar a pestaña de interrupciones
+- **Nuevas funciones de simulación**:
+  - `initKeyboardSimulator()` - Inicializa el simulador del teclado
+  - `simulateKeyboardCommand()` - Simula comandos al controlador i8042
+  - `initMouseSimulator()` - Inicializa el simulador del mouse
+  - `simulateMouseCommand()` - Simula comandos al mouse PS/2
+  - `simulateDMATransfer()` - Genera transferencias DMA simuladas
+  - `startDMASimulation()` - Inicia la simulación periódica de DMA
+  - `generateSimulatedInterrupts()` - Genera datos simulados de interrupciones para macOS
 
 ## Uso
 

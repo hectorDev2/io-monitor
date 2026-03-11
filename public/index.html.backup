@@ -1,0 +1,844 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Monitor de E/S y Registros del Sistema</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Monitor de E/S y Registros del Sistema</h1>
+            <div class="status" id="connectionStatus">
+                <span class="status-dot disconnected"></span>
+                Conectando...
+            </div>
+        </header>
+
+        <div class="system-info" id="systemInfo">
+            <div class="info-card">
+                <h3>Sistema</h3>
+                <p id="platform">Cargando...</p>
+            </div>
+            <div class="info-card">
+                <h3>Arquitectura</h3>
+                <p id="arch">Cargando...</p>
+            </div>
+            <div class="info-card">
+                <h3>CPUs</h3>
+                <p id="cpus">Cargando...</p>
+            </div>
+            <div class="info-card">
+                <h3>Hostname</h3>
+                <p id="hostname">Cargando...</p>
+            </div>
+        </div>
+
+        <div class="main-content">
+            <!-- ============================================
+                 SISTEMA DE PESTAÑAS PARA CONTROLADORES
+                 ============================================ -->
+            <div class="tabs-container">
+                <div class="tabs-header">
+                    <button class="tab-button active" data-tab="keyboard">
+                        <span class="tab-icon">⌨️</span>
+                        <span class="tab-label">Teclado</span>
+                    </button>
+                    <button class="tab-button" data-tab="mouse">
+                        <span class="tab-icon">🖱️</span>
+                        <span class="tab-label">Mouse</span>
+                    </button>
+                    <button class="tab-button" data-tab="ide">
+                        <span class="tab-icon">💿</span>
+                        <span class="tab-label">IDE/ATA</span>
+                    </button>
+                    <button class="tab-button" data-tab="sata">
+                        <span class="tab-icon">💽</span>
+                        <span class="tab-label">SATA</span>
+                    </button>
+                    <button class="tab-button" data-tab="nvme">
+                        <span class="tab-icon">⚡</span>
+                        <span class="tab-label">NVMe</span>
+                    </button>
+                    <button class="tab-button" data-tab="interrupts">
+                        <span class="tab-icon">⚡</span>
+                        <span class="tab-label">Interrupciones</span>
+                    </button>
+                </div>
+
+                <div class="tabs-content">
+                    <!-- ============================================
+                         PESTAÑA: CONTROLADOR DE TECLADO
+                         ============================================ -->
+                    <div class="tab-pane active" id="tab-keyboard">
+                        <div class="controller-section keyboard-section">
+                <div class="controller-header">
+                    <h1 class="controller-title">
+                        <span class="icon">⌨️</span>
+                        CONTROLADOR DE TECLADO (i8042)
+                    </h1>
+                    <div class="controller-info">
+                        <span class="info-badge">Puerto 0x60/0x64</span>
+                        <span class="info-badge">IRQ 1</span>
+                        <span class="info-badge" id="keyboardStatus">Esperando...</span>
+                    </div>
+                </div>
+
+                <!-- Buffer de Texto del Teclado -->
+                <section class="panel text-buffer-panel">
+                    <h2>
+                        <span class="icon">✍️</span>
+                        Buffer de Texto
+                        <span class="subtitle">Lo que estás escribiendo</span>
+                    </h2>
+                    <div class="text-buffer-container">
+                        <div class="buffer-display" id="textBuffer">
+                            <span class="placeholder">Empieza a escribir aquí...</span>
+                        </div>
+                        <div class="buffer-info">
+                            <span>Caracteres: <strong id="charCount">0</strong></span>
+                            <span>Última tecla: <strong id="lastKeyPress">-</strong></span>
+                            <button id="clearBuffer" class="clear-btn">Limpiar Buffer</button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Registros del Controlador de Teclado -->
+                <section class="panel registers-panel keyboard-registers">
+                    <h2>
+                        <span class="icon">🔧</span>
+                        Registros del Controlador de Teclado
+                        <span class="subtitle">Estado en tiempo real</span>
+                    </h2>
+                    <div class="registers-grid">
+                        <!-- Data Register (Puerto 0x60) -->
+                        <div class="register-box data-register" id="keyboardDataRegister">
+                            <div class="register-header">
+                                <h3>Data Register</h3>
+                                <span class="register-port">Puerto 0x60</span>
+                            </div>
+                            <div class="register-value">0x00</div>
+                            <div class="register-binary">00000000</div>
+                            <div class="register-description">Lee códigos de scan del teclado</div>
+                            <div class="register-activity"></div>
+                        </div>
+
+                        <!-- Status Register (Puerto 0x64 - Lectura) -->
+                        <div class="register-box status-register" id="keyboardStatusRegister">
+                            <div class="register-header">
+                                <h3>Status Register</h3>
+                                <span class="register-port">Puerto 0x64 (Read)</span>
+                            </div>
+                            <div class="register-value">0x00</div>
+                            <div class="register-binary">00000000</div>
+                            <div class="register-flags">
+                                <div class="flag" id="keyboard-flag-obf">
+                                    <span class="flag-name">OBF</span>
+                                    <span class="flag-desc">Output Buffer Full</span>
+                                </div>
+                                <div class="flag" id="keyboard-flag-ibf">
+                                    <span class="flag-name">IBF</span>
+                                    <span class="flag-desc">Input Buffer Full</span>
+                                </div>
+                            </div>
+                            <div class="register-activity"></div>
+                        </div>
+
+                        <!-- Command Register (Puerto 0x64 - Escritura) -->
+                        <div class="register-box command-register" id="keyboardCommandRegister">
+                            <div class="register-header">
+                                <h3>Command Register</h3>
+                                <span class="register-port">Puerto 0x64 (Write)</span>
+                            </div>
+                            <div class="register-value">0x00</div>
+                            <div class="register-binary">00000000</div>
+                            <div class="register-description">Comandos al controlador</div>
+                            <div class="register-activity"></div>
+                        </div>
+
+                        <!-- Control Register -->
+                        <div class="register-box control-register" id="keyboardControlRegister">
+                            <div class="register-header">
+                                <h3>Control Register</h3>
+                                <span class="register-port">Config Interna</span>
+                            </div>
+                            <div class="register-value">0x00</div>
+                            <div class="register-binary">00000000</div>
+                            <div class="register-flags">
+                                <div class="flag" id="keyboard-flag-irq1">
+                                    <span class="flag-name">IRQ1</span>
+                                    <span class="flag-desc">Keyboard Interrupt</span>
+                                </div>
+                            </div>
+                            <div class="register-activity"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Eventos del Teclado -->
+                <section class="panel highlight-panel keyboard-events-panel">
+                    <h2>
+                        <span class="icon">⚡</span>
+                        Eventos del Teclado
+                        <span class="subtitle">Presiona teclas AHORA</span>
+                    </h2>
+                    <div class="realtime-info keyboard-info">
+                        <p><strong>PRESIONA TECLAS:</strong> Cada tecla genera un código de scan que se escribe en el puerto 0x60</p>
+                        <p class="capture-mode" id="keyboardCaptureMode">Modo: Detectando...</p>
+                    </div>
+                    <div class="table-container">
+                        <table id="keyboardEventsTable">
+                            <thead>
+                                <tr>
+                                    <th>Tiempo</th>
+                                    <th>Acción</th>
+                                    <th>Tecla</th>
+                                    <th>Scan Code</th>
+                                    <th>Valor Raw</th>
+                                    <th>Puerto</th>
+                                    <th>Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="keyboardEventsBody">
+                                <tr>
+                                    <td colspan="7" class="loading">⌨️ Presiona cualquier tecla...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+            <!-- ============================================
+                 CONTROLADOR DE MOUSE (PS/2 Mouse)
+                 ============================================ -->
+            <div class="controller-section mouse-section">
+                <div class="controller-header">
+                    <h1 class="controller-title">
+                        <span class="icon">🖱️</span>
+                        CONTROLADOR DE MOUSE (PS/2)
+                    </h1>
+                    <div class="controller-info">
+                        <span class="info-badge">Puerto 0x60/0x64</span>
+                        <span class="info-badge">IRQ 12</span>
+                        <span class="info-badge" id="mouseStatus">Esperando...</span>
+                    </div>
+                </div>
+
+                <!-- Información del Mouse -->
+                <section class="panel mouse-info-panel">
+                    <h2>
+                        <span class="icon">📊</span>
+                        Estado del Mouse
+                        <span class="subtitle">Posición y estadísticas</span>
+                    </h2>
+                    <div class="mouse-stats-grid">
+                        <div class="stat-card">
+                            <label>Posición X:</label>
+                            <span id="mouseX" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <label>Posición Y:</label>
+                            <span id="mouseY" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <label>Movimientos:</label>
+                            <span id="mouseMovements" class="stat-value">0</span>
+                        </div>
+                        <div class="stat-card">
+                            <label>Clicks:</label>
+                            <span id="mouseClicksCount" class="stat-value">0</span>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Registros del Controlador de Mouse -->
+                <section class="panel registers-panel mouse-registers">
+                    <h2>
+                        <span class="icon">🔧</span>
+                        Registros del Controlador de Mouse
+                        <span class="subtitle">Estado en tiempo real</span>
+                    </h2>
+                    <div class="registers-grid">
+                        <!-- Data Register (Puerto 0x60) -->
+                        <div class="register-box data-register" id="mouseDataRegister">
+                            <div class="register-header">
+                                <h3>Data Register</h3>
+                                <span class="register-port">Puerto 0x60</span>
+                            </div>
+                            <div class="register-value">0x00</div>
+                            <div class="register-binary">00000000</div>
+                            <div class="register-description">Lee datos del mouse (3-4 bytes)</div>
+                            <div class="register-activity"></div>
+                        </div>
+
+                        <!-- Status Register (Puerto 0x64 - Lectura) -->
+                        <div class="register-box status-register" id="mouseStatusRegister">
+                            <div class="register-header">
+                                <h3>Status Register</h3>
+                                <span class="register-port">Puerto 0x64 (Read)</span>
+                            </div>
+                            <div class="register-value">0x00</div>
+                            <div class="register-binary">00000000</div>
+                            <div class="register-flags">
+                                <div class="flag" id="mouse-flag-obf">
+                                    <span class="flag-name">OBF</span>
+                                    <span class="flag-desc">Output Buffer Full</span>
+                                </div>
+                                <div class="flag" id="mouse-flag-auxdata">
+                                    <span class="flag-name">AUX</span>
+                                    <span class="flag-desc">Mouse Data Available</span>
+                                </div>
+                            </div>
+                            <div class="register-activity"></div>
+                        </div>
+
+                        <!-- Command Register (Puerto 0x64 - Escritura) -->
+                        <div class="register-box command-register" id="mouseCommandRegister">
+                            <div class="register-header">
+                                <h3>Command Register</h3>
+                                <span class="register-port">Puerto 0x64 (Write)</span>
+                            </div>
+                            <div class="register-value">0x00</div>
+                            <div class="register-binary">00000000</div>
+                            <div class="register-description">Comandos al controlador</div>
+                            <div class="register-activity"></div>
+                        </div>
+
+                        <!-- Control Register -->
+                        <div class="register-box control-register" id="mouseControlRegister">
+                            <div class="register-header">
+                                <h3>Control Register</h3>
+                                <span class="register-port">Config Interna</span>
+                            </div>
+                            <div class="register-value">0x00</div>
+                            <div class="register-binary">00000000</div>
+                            <div class="register-flags">
+                                <div class="flag" id="mouse-flag-irq12">
+                                    <span class="flag-name">IRQ12</span>
+                                    <span class="flag-desc">Mouse Interrupt</span>
+                                </div>
+                            </div>
+                            <div class="register-activity"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Eventos del Mouse -->
+                <section class="panel highlight-panel mouse-events-panel">
+                    <h2>
+                        <span class="icon">⚡</span>
+                        Eventos del Mouse
+                        <span class="subtitle">Mueve el mouse o haz click AHORA</span>
+                    </h2>
+                    <div class="realtime-info mouse-info">
+                        <p><strong>MUEVE EL MOUSE:</strong> Cada movimiento y click genera paquetes de datos en el puerto 0x60</p>
+                        <p class="capture-mode" id="mouseCaptureMode">Modo: Detectando...</p>
+                    </div>
+                    <div class="table-container">
+                        <table id="mouseEventsTable">
+                            <thead>
+                                <tr>
+                                    <th>Tiempo</th>
+                                    <th>Tipo</th>
+                                    <th>Eje/Botón</th>
+                                    <th>Valor</th>
+                                    <th>Valor Raw</th>
+                                    <th>Puerto</th>
+                                    <th>Registro</th>
+                                </tr>
+                            </thead>
+                            <tbody id="mouseEventsBody">
+                                <tr>
+                                    <td colspan="7" class="loading">🖱️ Mueve el mouse o haz click...</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+            </div>
+
+
+
+            <!-- Sección de Interrupciones -->
+            <section class="panel">
+                <h2>
+                    <span class="icon">⚡</span>
+                    Interrupciones (IRQs)
+                    <span class="subtitle">Actualizaciones en tiempo real</span>
+                </h2>
+                <div class="panel-header">
+                    <div class="legend">
+                        <span class="legend-item"><span class="badge keyboard"></span> Teclado</span>
+                        <span class="legend-item"><span class="badge mouse"></span> Mouse</span>
+                        <span class="legend-item"><span class="badge disk"></span> Disco</span>
+                        <span class="legend-item"><span class="badge network"></span> Red</span>
+                        <span class="legend-item"><span class="badge usb"></span> USB</span>
+                        <span class="legend-item"><span class="badge display"></span> Display</span>
+                    </div>
+                </div>
+                <div class="table-container">
+                    <table id="interruptsTable">
+                        <thead>
+                            <tr>
+                                <th>IRQ</th>
+                                <th>Dispositivo</th>
+                                <th>Tipo</th>
+                                <th>Total</th>
+                                <th>Delta</th>
+                                <th>Actividad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="interruptsBody">
+                            <tr>
+                                <td colspan="6" class="loading">Esperando datos...</td>
+                            </tr>
+                        </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                        <!-- Sección de Puertos E/S (Linux) -->
+                        <section class="panel" id="portsSection" style="display: none;">
+                            <h2>
+                                <span class="icon">🔌</span>
+                                Puertos de E/S
+                                <span class="subtitle">Rangos de puertos asignados</span>
+                            </h2>
+                            <div class="table-container">
+                                <table id="portsTable">
+                                    <thead>
+                                        <tr>
+                                            <th>Inicio</th>
+                                            <th>Fin</th>
+                                            <th>Dispositivo</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="portsBody">
+                                        <tr>
+                                            <td colspan="3" class="loading">Esperando datos...</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </section>
+
+                        <!-- Visualización de Registros -->
+                        <section class="panel">
+                            <h2>
+                                <span class="icon">📊</span>
+                                Visualización de Registros
+                                <span class="subtitle">Actividad de registros en tiempo real</span>
+                            </h2>
+                            <div class="registers-container">
+                                <canvas id="registersCanvas"></canvas>
+                            </div>
+                        </section>
+                    </div>
+                    <!-- Fin Pestaña Interrupciones -->
+
+                    <!-- ============================================
+                         PESTAÑA: IDE/ATA
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-ide">
+                        <!-- Controlador IDE/ATA (Primary & Secondary) -->
+            <div class="controller-section ide-section">
+                <div class="controller-header">
+                    <div class="controller-title">
+                        <span class="icon">💿</span>
+                        <h2>Controlador IDE/ATA</h2>
+                    </div>
+                    <div class="controller-badges">
+                        <span class="info-badge">
+                            <strong>Puerto:</strong> 0x1F0-0x1F7 (Primary)
+                        </span>
+                        <span class="info-badge">
+                            <strong>IRQ:</strong> IRQ14/15
+                        </span>
+                        <span class="info-badge ide-status">
+                            <strong>Estado:</strong> <span id="ideStatus">Activo</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Estadísticas IDE -->
+                <div class="disk-stats-container">
+                    <div class="stat-card">
+                        <div class="stat-label">📖 Lecturas</div>
+                        <div class="stat-value" id="ideReads">0</div>
+                        <div class="stat-detail">operaciones completadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📝 Escrituras</div>
+                        <div class="stat-value" id="ideWrites">0</div>
+                        <div class="stat-detail">operaciones completadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📥 Bytes Leídos</div>
+                        <div class="stat-value" id="ideReadBytes">0 B</div>
+                        <div class="stat-detail">desde el inicio</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📤 Bytes Escritos</div>
+                        <div class="stat-value" id="ideWriteBytes">0 B</div>
+                        <div class="stat-detail">desde el inicio</div>
+                    </div>
+                </div>
+
+                <!-- Registros IDE -->
+                <div class="registers-grid">
+                    <!-- Data Register -->
+                    <div class="register-box" id="ideDataRegister">
+                        <div class="register-header">
+                            <span class="register-title">Data Register</span>
+                            <span class="register-port">Puerto 0x1F0</span>
+                        </div>
+                        <div class="register-value">0x00</div>
+                        <div class="register-binary">00000000</div>
+                        <div class="register-description">Lectura/Escritura de datos del sector</div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- Status Register -->
+                    <div class="register-box" id="ideStatusRegister">
+                        <div class="register-header">
+                            <span class="register-title">Status Register</span>
+                            <span class="register-port">Puerto 0x1F7</span>
+                        </div>
+                        <div class="register-value">0x50</div>
+                        <div class="register-binary">01010000</div>
+                        <div class="register-description">Estado del controlador IDE</div>
+                        <div class="register-flags">
+                            <span class="flag" id="ide-flag-busy">BUSY</span>
+                            <span class="flag" id="ide-flag-drdy">DRDY</span>
+                            <span class="flag" id="ide-flag-err">ERR</span>
+                        </div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- Command Register -->
+                    <div class="register-box" id="ideCommandRegister">
+                        <div class="register-header">
+                            <span class="register-title">Command Register</span>
+                            <span class="register-port">Puerto 0x1F7</span>
+                        </div>
+                        <div class="register-value">0x00</div>
+                        <div class="register-binary">00000000</div>
+                        <div class="register-description">Último comando enviado</div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- LBA Register -->
+                    <div class="register-box" id="ideLBARegister">
+                        <div class="register-header">
+                            <span class="register-title">LBA Register</span>
+                            <span class="register-port">Puerto 0x1F3-0x1F6</span>
+                        </div>
+                        <div class="register-value">0x00000000</div>
+                        <div class="register-binary">00000000 00000000</div>
+                        <div class="register-description">Dirección del sector (LBA)</div>
+                        <div class="register-activity"></div>
+                    </div>
+                </div>
+
+                <!-- Dispositivos IDE detectados -->
+                <div class="device-list">
+                    <h3>Dispositivos Detectados</h3>
+                    <div id="ideDevices" class="device-chips">
+                        <span class="device-chip">sda: 500 GB</span>
+                        </div>
+                    </div>
+                </div>
+            <!-- Fin Pestaña IDE -->
+
+                    <!-- ============================================
+                         PESTAÑA: SATA
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-sata">
+                        <!-- Controlador SATA (AHCI) -->
+            <div class="controller-section sata-section">
+                <div class="controller-header">
+                    <div class="controller-title">
+                        <span class="icon">💽</span>
+                        <h2>Controlador SATA (AHCI)</h2>
+                    </div>
+                    <div class="controller-badges">
+                        <span class="info-badge">
+                            <strong>Interfaz:</strong> AHCI
+                        </span>
+                        <span class="info-badge">
+                            <strong>IRQ:</strong> MSI/MSI-X
+                        </span>
+                        <span class="info-badge sata-status">
+                            <strong>Estado:</strong> <span id="sataStatus">Activo</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Estadísticas SATA -->
+                <div class="disk-stats-container">
+                    <div class="stat-card">
+                        <div class="stat-label">📖 Lecturas</div>
+                        <div class="stat-value" id="sataReads">0</div>
+                        <div class="stat-detail">operaciones completadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📝 Escrituras</div>
+                        <div class="stat-value" id="sataWrites">0</div>
+                        <div class="stat-detail">operaciones completadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📥 Bytes Leídos</div>
+                        <div class="stat-value" id="sataReadBytes">0 B</div>
+                        <div class="stat-detail">desde el inicio</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📤 Bytes Escritos</div>
+                        <div class="stat-value" id="sataWriteBytes">0 B</div>
+                        <div class="stat-detail">desde el inicio</div>
+                    </div>
+                </div>
+
+                <!-- Registros SATA/AHCI -->
+                <div class="registers-grid">
+                    <!-- Command List Base Address -->
+                    <div class="register-box" id="sataCommandListRegister">
+                        <div class="register-header">
+                            <span class="register-title">Command List Base</span>
+                            <span class="register-port">MMIO Offset 0x00</span>
+                        </div>
+                        <div class="register-value">0x00000000</div>
+                        <div class="register-binary">00000000 00000000</div>
+                        <div class="register-description">Base de lista de comandos AHCI</div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- Port Status -->
+                    <div class="register-box" id="sataPortStatusRegister">
+                        <div class="register-header">
+                            <span class="register-title">Port Status</span>
+                            <span class="register-port">MMIO PxSSTSS</span>
+                        </div>
+                        <div class="register-value">0x113</div>
+                        <div class="register-binary">00010011</div>
+                        <div class="register-description">Estado del puerto SATA</div>
+                        <div class="register-flags">
+                            <span class="flag flag-active" id="sata-flag-det">DET=3</span>
+                            <span class="flag flag-active" id="sata-flag-spd">SPD=1</span>
+                        </div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- Command Register -->
+                    <div class="register-box" id="sataCommandRegister">
+                        <div class="register-header">
+                            <span class="register-title">Command Register</span>
+                            <span class="register-port">MMIO PxCMD</span>
+                        </div>
+                        <div class="register-value">0x0017</div>
+                        <div class="register-binary">00010111</div>
+                        <div class="register-description">Control de puerto SATA</div>
+                        <div class="register-flags">
+                            <span class="flag" id="sata-flag-st">ST</span>
+                            <span class="flag" id="sata-flag-fre">FRE</span>
+                        </div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- Task File Data -->
+                    <div class="register-box" id="sataTFDataRegister">
+                        <div class="register-header">
+                            <span class="register-title">Task File Data</span>
+                            <span class="register-port">MMIO PxTFD</span>
+                        </div>
+                        <div class="register-value">0x50</div>
+                        <div class="register-binary">01010000</div>
+                        <div class="register-description">Estado del Task File</div>
+                        <div class="register-activity"></div>
+                    </div>
+                </div>
+
+                <!-- Dispositivos SATA detectados -->
+                <div class="device-list">
+                    <h3>Dispositivos Detectados</h3>
+                    <div id="sataDevices" class="device-chips">
+                        <span class="device-chip">sda: 1 TB SSD</span>
+                        </div>
+                        </div>
+                    </div>
+                    <!-- Fin Pestaña SATA -->
+
+                    <!-- ============================================
+                         PESTAÑA: NVMe
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-nvme">
+                        <!-- Controlador NVMe -->
+                        <div class="controller-section nvme-section">
+                <div class="controller-header">
+                    <div class="controller-title">
+                        <span class="icon">⚡</span>
+                        <h2>Controlador NVMe</h2>
+                    </div>
+                    <div class="controller-badges">
+                        <span class="info-badge">
+                            <strong>Interfaz:</strong> PCIe Gen3/4 x4
+                        </span>
+                        <span class="info-badge">
+                            <strong>IRQ:</strong> MSI-X
+                        </span>
+                        <span class="info-badge nvme-status">
+                            <strong>Estado:</strong> <span id="nvmeStatus">Activo</span>
+                        </span>
+                    </div>
+                </div>
+
+                <!-- Estadísticas NVMe -->
+                <div class="disk-stats-container">
+                    <div class="stat-card">
+                        <div class="stat-label">📖 Lecturas</div>
+                        <div class="stat-value" id="nvmeReads">0</div>
+                        <div class="stat-detail">operaciones completadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📝 Escrituras</div>
+                        <div class="stat-value" id="nvmeWrites">0</div>
+                        <div class="stat-detail">operaciones completadas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📥 Bytes Leídos</div>
+                        <div class="stat-value" id="nvmeReadBytes">0 B</div>
+                        <div class="stat-detail">desde el inicio</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">📤 Bytes Escritos</div>
+                        <div class="stat-value" id="nvmeWriteBytes">0 B</div>
+                        <div class="stat-detail">desde el inicio</div>
+                    </div>
+                </div>
+
+                <!-- Registros NVMe -->
+                <div class="registers-grid">
+                    <!-- Admin Queue Base -->
+                    <div class="register-box" id="nvmeAdminQueueRegister">
+                        <div class="register-header">
+                            <span class="register-title">Admin Queue Base</span>
+                            <span class="register-port">BAR0 + 0x28</span>
+                        </div>
+                        <div class="register-value">0x00000000</div>
+                        <div class="register-binary">00000000 00000000</div>
+                        <div class="register-description">Base de cola de administración</div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- Controller Status -->
+                    <div class="register-box" id="nvmeStatusRegister">
+                        <div class="register-header">
+                            <span class="register-title">Controller Status</span>
+                            <span class="register-port">BAR0 + 0x1C (CSTS)</span>
+                        </div>
+                        <div class="register-value">0x01</div>
+                        <div class="register-binary">00000001</div>
+                        <div class="register-description">Estado del controlador NVMe</div>
+                        <div class="register-flags">
+                            <span class="flag flag-active" id="nvme-flag-rdy">RDY</span>
+                            <span class="flag" id="nvme-flag-cfs">CFS</span>
+                        </div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- Controller Config -->
+                    <div class="register-box" id="nvmeConfigRegister">
+                        <div class="register-header">
+                            <span class="register-title">Controller Config</span>
+                            <span class="register-port">BAR0 + 0x14 (CC)</span>
+                        </div>
+                        <div class="register-value">0x460001</div>
+                        <div class="register-binary">01000110 00000001</div>
+                        <div class="register-description">Configuración del controlador</div>
+                        <div class="register-flags">
+                            <span class="flag flag-active" id="nvme-flag-en">EN</span>
+                        </div>
+                        <div class="register-activity"></div>
+                    </div>
+
+                    <!-- Doorbell Register -->
+                    <div class="register-box" id="nvmeDoorbellRegister">
+                        <div class="register-header">
+                            <span class="register-title">Doorbell</span>
+                            <span class="register-port">BAR0 + 0x1000+</span>
+                        </div>
+                        <div class="register-value">0x0000</div>
+                        <div class="register-binary">00000000</div>
+                        <div class="register-description">Notificación de comandos</div>
+                        <div class="register-activity"></div>
+                    </div>
+                </div>
+
+                <!-- Dispositivos NVMe detectados -->
+                <div class="device-list">
+                    <h3>Dispositivos Detectados</h3>
+                    <div id="nvmeDevices" class="device-chips">
+                        <span class="device-chip">nvme0n1: 512 GB NVMe SSD</span>
+                        </div>
+                    </div>
+                </div>
+            <!-- Fin Pestaña NVMe -->
+
+                    <!-- ============================================
+                         PESTAÑA: INTERRUPCIONES
+                         ============================================ -->
+                    <div class="tab-pane" id="tab-interrupts">
+                        <!-- Sección de Interrupciones -->
+                        <section class="panel">
+                <h2>
+                    <span class="icon">🔌</span>
+                    Puertos de E/S
+                    <span class="subtitle">Rangos de puertos asignados</span>
+                </h2>
+                <div class="table-container">
+                    <table id="portsTable">
+                        <thead>
+                            <tr>
+                                <th>Inicio</th>
+                                <th>Fin</th>
+                                <th>Dispositivo</th>
+                            </tr>
+                        </thead>
+                        <tbody id="portsBody">
+                            <tr>
+                                <td colspan="3" class="loading">Esperando datos...</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                        <!-- Visualización de Registros -->
+                        <section class="panel">
+                <h2>
+                    <span class="icon">📊</span>
+                    Visualización de Registros
+                    <span class="subtitle">Actividad de registros en tiempo real</span>
+                </h2>
+                        <div class="registers-container">
+                            <canvas id="registersCanvas"></canvas>
+                        </div>
+                    </section>
+                </div>
+                <!-- Fin Pestaña Interrupciones -->
+
+            </div>
+            <!-- Fin Sistema de Pestañas -->
+        </div>
+        </div>
+
+        <footer>
+            <p>Última actualización: <span id="lastUpdate">-</span></p>
+            <p class="note" id="platformNote"></p>
+        </footer>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

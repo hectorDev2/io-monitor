@@ -1,23 +1,25 @@
-# Monitor REAL de E/S y Registros del Sistema
+# Monitor REAL de E/S y Registros del Sistema (Solo Linux)
 
 Una aplicación que captura y visualiza **eventos REALES del hardware** en tiempo real, mostrando códigos de scan, valores de registros y puertos de E/S exactamente como el sistema operativo los manipula.
 
+**IMPORTANTE:** Esta aplicación solo funciona completamente en **Linux con permisos de root**. No hay simulaciones ni datos falsos.
+
 ![License](https://img.shields.io/badge/license-MIT-blue.svg)
 ![Node](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen.svg)
-![Platform](https://img.shields.io/badge/platform-Linux%20%7C%20macOS%20%7C%20Windows-lightgrey.svg)
+![Platform](https://img.shields.io/badge/platform-Linux%20Only-red.svg)
 
 ## Características Principales
 
 ### 🎯 Captura REAL de Eventos del Hardware
-- **Lee directamente de `/dev/input`** en Linux (con sudo)
+- **Lee directamente de `/dev/input`** en Linux con sudo
 - Muestra **scan codes reales** del hardware (no keyCodes del navegador)
 - Visualiza **valores exactos de registros** (puertos 0x60, 0x64)
-- Captura eventos **directamente del kernel**, no del navegador
+- Captura eventos **directamente del kernel**
 
 ### ⚡ Visualización en Tiempo Real
 - **Cada tecla presionada** aparece instantáneamente con sus valores hexadecimales
 - **Cada movimiento del mouse** muestra los valores del controlador PS/2
-- **Códigos de scan reales** del hardware (ej: 30 para 'A', no 65)
+- **Códigos de scan reales** del hardware (ej: 30 para 'A')
 - **Flash visual** cuando se escribe en los registros
 
 ### 📊 Información Detallada
@@ -30,7 +32,7 @@ Una aplicación que captura y visualiza **eventos REALES del hardware** en tiemp
 
 **❌ Otras herramientas simulan** o capturan desde el navegador
 
-**✅ Esta aplicación captura DIRECTAMENTE del hardware** (en Linux con sudo)
+**✅ Esta aplicación captura DIRECTAMENTE del hardware** (solo Linux con sudo)
 
 ```
 Hardware → /dev/input → Esta App → Tu Pantalla
@@ -39,8 +41,12 @@ Hardware → /dev/input → Esta App → Tu Pantalla
 
 ## Requisitos Previos
 
+- **Sistema Operativo:** Linux (Ubuntu, Debian, Fedora, Arch, etc.)
+- **Permisos:** Root (sudo)
 - Node.js >= 14.0.0
 - npm o yarn
+
+**NOTA:** macOS y Windows NO están soportados. Esta aplicación requiere acceso directo a `/proc/interrupts`, `/proc/diskstats`, `/proc/ioports` y `/dev/input`, que solo están disponibles en Linux.
 
 ## Instalación
 
@@ -56,7 +62,9 @@ npm install
 
 ## Uso
 
-### 🚀 Inicio con Captura REAL (Linux - RECOMENDADO)
+### 🚀 Inicio con Captura REAL (Linux - REQUERIDO)
+
+**IMPORTANTE: Solo funciona en Linux con sudo**
 
 ```bash
 sudo npm start
@@ -68,25 +76,17 @@ sudo npm start
    - Scan code REAL (ej: 30 para 'A')
    - Valor del puerto `0x60` en hexadecimal
    - Tipo de evento `EV_KEY (0x01)`
-   - Etiqueta `HARDWARE` (no `BROWSER`)
-
-### Inicio Básico (Sin privilegios)
-
-```bash
-npm start
-```
-
-Capturará eventos desde el navegador (fallback). Los scan codes serán keyCodes de JavaScript.
-sudo npm start
-```
+   - Etiqueta `HARDWARE` (captura real del kernel)
 
 ### Modo Desarrollo
 
 ```bash
-npm run dev
+sudo npm run dev
 ```
 
 Usa `nodemon` para reiniciar automáticamente el servidor cuando detecte cambios.
+
+**NOTA:** Si ejecutas sin `sudo`, el servidor iniciará pero no podrá acceder a `/dev/input`, `/proc/interrupts`, etc. Solo funciona completamente con permisos de root.
 
 ## Arquitectura
 
@@ -104,24 +104,20 @@ io-monitor/
 └── package.json
 ```
 
-## Funcionalidades por Sistema Operativo
+## Funcionalidades (Solo Linux)
 
-### Linux
+### Linux (Completamente Soportado)
 - **Acceso completo** a `/proc/interrupts` para IRQs reales
 - Lee `/proc/diskstats` para estadísticas de E/S
 - Acceso a `/proc/ioports` para rangos de puertos
-- Lista dispositivos de input en `/dev/input`
+- Lista y lee dispositivos de input en `/dev/input`
 - **Requiere sudo para acceso completo**
 
-### macOS
-- Utiliza `iostat` para estadísticas de disco
-- Datos de IRQ simulados (macOS restringe acceso directo)
-- Estadísticas del sistema mediante `vm_stat`
-
-### Windows
-- Usa WMI para información del sistema
-- Datos de IRQ simulados (Windows restringe acceso directo)
-- Información de discos mediante `wmic`
+### macOS y Windows
+- **NO SOPORTADOS**
+- No hay acceso a interrupciones del sistema
+- No hay acceso a dispositivos de entrada de bajo nivel
+- No hay simulación de datos - solo funciona con datos reales en Linux
 
 ## API del Servidor
 
@@ -208,9 +204,10 @@ Esta aplicación es ideal para:
 
 ## Limitaciones
 
-- **Permisos**: En Linux, se requieren privilegios de root para acceso completo a registros del sistema
-- **macOS/Windows**: Acceso limitado a IRQs debido a restricciones del sistema operativo (se muestran datos simulados)
+- **Sistema Operativo**: Solo funciona en Linux. macOS y Windows no están soportados.
+- **Permisos**: Se requieren privilegios de root (sudo) para acceso completo a registros del sistema
 - **Seguridad**: Esta aplicación lee información del sistema pero no modifica ningún registro
+- **Sin Simulación**: No hay datos simulados ni falsos. Todo es captura real del hardware.
 
 ## Desarrollo
 
